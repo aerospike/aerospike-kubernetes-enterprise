@@ -1,4 +1,4 @@
-# aerospike-kube
+# aerospike-kubeernets-enterprise
 
 This project contains the init container used in Kubernetes (k8s) and the Aerospike StatefulSet definition
 
