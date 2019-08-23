@@ -35,7 +35,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
       - name: aerospike
-        image: aerospike/aerospike-server
+        image: aerospike/aerospike-server-enterprise
         ports:
         - containerPort: 3000
           name: aero-clients
@@ -50,7 +50,7 @@ spec:
               command:
               - /bin/sh
               - -c
-              - "while true; do finished=0; for part in $( asadm --no-config-file -e 'asinfo -v statistics -l' | grep migrate_par | cut -d= -f2); do if [ $part != 0 ]; then break; fi; finished=1; done; if [ $finished != 1 ]; then sleep 15; else exit 0; fi; done"
+              - "while true; do finished=0; for part in $( asadm --no-config-file -e 'asinfo -v statistics -l' | grep migrate_partitions_remaining | cut -d= -f2); do if [ $part != 0 ]; then finished=0; break; fi; finished=1; done; if [ $finished != 1 ]; then sleep 15; else exit 0; fi; done"
         livenessProbe:
           exec:
             command:
@@ -79,6 +79,8 @@ spec:
           value: "$AEROSPIKE_MEM"
         - name: DEFAULT_TTL
           value: "$AEROSPIKE_TTL"
+        - name: FEATURE_KEY_FILE
+          value: "$AEROSPIKE_FEATURE_KEY_FILE"
         # Downward API:
         - name: MY_POD_NAME
           valueFrom:
@@ -120,9 +122,10 @@ spec:
       name: datadir
       labels: *AerospikeDeploymentLabels
     spec:
-      accessModes: [ "ReadWriteOnce" ]
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: ssd
       resources:
         requests:
           storage: ${AEROSPIKE_MEM}Gi
-      storageClassName: ssd
 ---

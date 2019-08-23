@@ -41,6 +41,9 @@ apt-get update && apt-get install -y wget
 wget https://storage.googleapis.com/kubernetes-release/pets/peer-finder -O /peer-finder
 cp /configs/on-start.sh /on-start.sh
 cp /configs/aerospike.template.conf "${CONFIG_VOLUME}"/
+if [ -f /configs/features.conf ]; then
+        cp /configs/features.conf "${CONFIG_VOLUME}"/
+fi
 chmod +x /on-start.sh
 chmod +x /peer-finder
 /peer-finder -on-start=/on-start.sh -service=$K8_SERVICE -ns=${NAMESPACE}
