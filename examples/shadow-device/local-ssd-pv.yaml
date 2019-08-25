@@ -15,14 +15,26 @@
 # the License.
 # ------------------------------------------------------------------------------
 
-# kind: StorageClass
-# apiVersion: storage.k8s.io/v1
-# metadata:
-#   name: ssd
-#   annotations:
-#     storageclass.kubernetes.io/is-default-class: "true"
-# provisioner: kubernetes.io/aws-ebs
-# parameters:
-#   type: gp2
-#   encrypted: false
-# ---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: local-ssd
+spec:
+  volumeMode: Block
+  capacity:
+    storage: 75Gi
+  local:
+    path: /dev/nvme1n1
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: aerospike-ssd
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - aerospike-node-1
+---
