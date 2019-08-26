@@ -1,10 +1,10 @@
 # aerospike-kubernetes-enterprise
 
 This project contains the init container used in Kubernetes (k8s) and the Aerospike StatefulSet definition.
-
 This manifest will allow you to deploy a fully formed Aerospike cluster in minutes.
 
-Uses:
+This project uses:
+
 - [aerospike-server-enterprise docker image](https://hub.docker.com/r/aerospike/aerospike-server-enterprise)
 - [aerospike-tools docker image](https://hub.docker.com/r/aerospike/aerospike-tools)
 
@@ -31,17 +31,25 @@ All other parameters are required.
 **NOTE:** Feature key file is mandatory for running aerospike server enterprise edition.
 
 
-### Storage
+### Storage: 
 
-You can configure your own storage class or uncomment either the `storageclass-gcp.yaml` or `storageclass-aws.yaml`.
+You can configure your own storage class or use/edit the provided `storageclass-gcp.yaml` or `storageclass-aws.yaml`.
 
-
-### Apply feature-key-file
-
-To apply feature-key-file, simply add the file to `configs/` and create the ConfigMap. If using mounted volumes to apply the feature-key-file, you can use the AEROSPIKE_FEATURE_KEY_FILE to specify the path.
+For Kubernetes version > 1.11, there's a default storage class `gp2` available on AWS EKS clusters, uses `aws-ebs` provisioner and volume type `gp2`.
 
 
-### Deploy:
+### Apply feature-key-file:
+
+To apply feature-key-file, simply add the file to `configs/` and create the ConfigMap. If using mounted volumes to apply the feature-key-file, you can use `AEROSPIKE_FEATURE_KEY_FILE` to specify the file path within the container.
+
+
+### Examples:
+
+To view and run the examples, go to [`examples/`](examples/)
+
+### Deployment:
+
+Please follow the below steps or run `start.sh` script:
 
 1. Expand manifest template:
 
@@ -61,6 +69,9 @@ kubectl create configmap aerospike-conf -n $NAMESPACE --from-file=configs/
 kubectl create -f expanded.yaml
 ```
 
+### Helm Charts
+
+Helm chart for the same can be found [here](helm/)
 
 ## Requirements
 

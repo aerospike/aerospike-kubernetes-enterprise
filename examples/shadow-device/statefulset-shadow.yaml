@@ -1,0 +1,147 @@
+# ------------------------------------------------------------------------------
+# Copyright 2012-2018 Aerospike, Inc.
+#
+# Portions may be licensed to Aerospike, Inc. under one or more contributor
+# license agreements.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+# ------------------------------------------------------------------------------
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: aerospike
+  namespace: $NAMESPACE
+  labels: &AerospikeDeploymentLabels
+    app: $APP_NAME
+spec:
+  serviceName: aerospike
+  selector:
+    matchLabels:
+      app: $APP_NAME
+  replicas: 1
+  template:
+    metadata:
+      labels: *AerospikeDeploymentLabels
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: aerospike
+        image: aerospike/aerospike-server-enterprise
+        ports:
+        - containerPort: 3000
+          name: aero-clients
+        - containerPort: 3002
+          name: aero-mesh
+        - containerPort: 3003
+          name: aero-info
+        # Do not stop node before migrations are complete
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - "while true; do finished=0; for part in $( asadm --no-config-file -e 'asinfo -v statistics -l' | grep migrate_partitions_remaining | cut -d= -f2); do if [ $part != 0 ]; then finished=0; break; fi; finished=1; done; if [ $finished != 1 ]; then sleep 15; else exit 0; fi; done"
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - "asinfo -v build"
+          initialDelaySeconds: 30
+          periodSeconds: 60
+        readinessProbe:
+          tcpSocket:
+              port: 3000
+          initialDelaySeconds: 10
+          timeoutSeconds: 1
+          periodSeconds: 10
+        volumeMounts:
+        - name: confdir
+          mountPath: /etc/aerospike
+        volumeDevices:
+        - name: data-dev
+          devicePath: /dev/sda
+        - name: shadow-dev
+          devicePath: /dev/sdb
+        env:
+        - name: NAMESPACE
+          value: "$AEROSPIKE_NAMESPACE"
+        - name: REPL_FACTOR
+          value: "$AEROSPIKE_REPL"
+        - name: MEM_GB
+          value: "$AEROSPIKE_MEM"
+        - name: DEFAULT_TTL
+          value: "$AEROSPIKE_TTL"
+        - name: FEATURE_KEY_FILE
+          value: "$AEROSPIKE_FEATURE_KEY_FILE"
+        # Downward API:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: MY_POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: MY_POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+      initContainers:
+      - name: aerospike-init
+        image: aerospike/aerospike-tools
+        command: ["/bin/sh"]
+        args: ["-c", "cp /configs/install.sh /install.sh && chmod +x /install.sh && /install.sh"]
+        volumeMounts:
+        - name: confdir
+          mountPath: /etc/aerospike
+        - name: initconfigs
+          mountPath: /configs
+        env:    # Variables needed by peer-finder for discovery
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: SERVICE
+          value: aerospike
+      volumes:
+      - name: confdir
+        emptyDir: {}
+      - name: initconfigs
+        configMap:
+          name: aerospike-conf
+      - name: data-dev
+        persistentVolumeClaim:
+          claimName: local-ssd-claim
+      - name: shadow-dev
+        persistentVolumeClaim:
+          claimName: shadow-device-claim
+---
+
+###
+### 'volumeClaimTemplates' can be used for shadow device claim. For example, using 'aws-ebs' provisioner (dynamic provisioning)
+### Note that dynamic provisioning for local volumes are not supported yet.
+###
+### volumeClaimTemplates:
+### - metadata:
+###     name: shadow-dev
+###     labels: *AerospikeDeploymentLabels
+###   spec:
+###     volumeMode: Block
+###     accessModes:
+###       - ReadWriteOnce
+###     storageClassName: gp2
+###     resources:
+###       requests:
+###         storage: 75Gi
+###
