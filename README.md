@@ -45,7 +45,7 @@ To apply feature-key-file, simply add the file to `configs/` and create the Conf
 
 ### Examples:
 
-To view and run the examples, go to [`examples/`](examples/README.md)
+To view and run the examples, go to [`examples/`](examples/)
 
 ### Deployment:
 
@@ -69,6 +69,9 @@ kubectl create configmap aerospike-conf -n $NAMESPACE --from-file=configs/
 kubectl create -f expanded.yaml
 ```
 
+### Helm Charts
+
+Helm chart for the same can be found [here](helm/)
 
 ## Requirements
 
