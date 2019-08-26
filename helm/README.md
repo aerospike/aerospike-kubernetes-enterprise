@@ -5,7 +5,7 @@ Implements a dynamically scalable Aerospike cluster using Kubernetes StatefulSet
 
 ## Usage:
 
-1. Before installing the chart, copy all the files [config/](configs/) directory including `feature-key-file` to `files/` directory. These files are necessary to create configMap object.
+1. Before installing the chart, copy all the files [config/](../configs/) directory including `feature-key-file` to `files/` directory. These files are necessary to create configMap object.
 
 2. Install the chart.
 
