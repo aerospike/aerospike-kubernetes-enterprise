@@ -36,7 +36,7 @@ All other parameters are required.
 The [statefulset definition](manifests/statefulset.yaml) refers to a custom StorageClass `ssd`.
 You can find the storageclass `ssd` definition in [storageclass-aws.yaml](manifests/storageclass-aws.yaml) or [storageclass-gcp.yaml](manifests/storageclass-gcp.yaml) (Uncomment them to use). You can also define your own storageclass and use it within the statefulset definition.
 
-If want to use the raw block volume mode, you need to use `volumeMode` as `Block` in the Volume Claim and use `VolumeDevices` and `devicePath` instead of `VolumeMounts` and `mountPath` as shown in the example below.
+If you want to use the raw block volume mode, you need to define `volumeMode` as `Block` in the Volume Claim and use `volumeDevices` and `devicePath` instead of `volumeMounts` and `mountPath` as shown in the example below.
 
 ```
   volumeClaimTemplates:
