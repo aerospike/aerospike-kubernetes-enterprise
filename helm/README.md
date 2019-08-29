@@ -25,7 +25,9 @@ helm install --set dBReplicas=5 --name aerospike-release ./
 
 ### Apply your own aerospike.conf file or template
 
-To override the default `aerospike.template.conf`, set `confFilePath` to point to your own custom `aerospike.conf` file or template. Note that it should be a path on your machine where `helm` client is running. The custom `aerospike.conf` file or template must contain `# mesh-seed-placeholder` in `heartbeat` configuration to populate mesh configuration during peer discovery. For example,
+- To override the default `aerospike.template.conf`, set `confFilePath` to point to your own custom `aerospike.conf` file or template.
+- Note that `confFilePath` should be a path on your machine where `helm` client is running.
+- The custom `aerospike.conf` file or template must contain `# mesh-seed-placeholder` in `heartbeat` configuration to populate mesh configuration during peer discovery. For example,
 
 ```
 ....
@@ -43,14 +45,17 @@ To override the default `aerospike.template.conf`, set `confFilePath` to point t
 .....
 ```
 
-Use `confFilePath` during `helm install` with `--set-file` option.
+- Use `confFilePath` during `helm install` with `--set-file` option.
 ```
 helm install --name aerospike-release --set-file confFilePath=/tmp/aerospike_templates/aerospike.template.conf ./
 ```
 
 ### Apply feature-key-file (Enterprise licence) file
 
-To supply `feature-key-file` during the deployment, use `featureKeyFilePath` to point to your `features.conf` licence file during `helm install`. The path should be on your machine where `helm` client is running. If using mounted volumes to apply the `feature-key-file`, you can use `aerospikeFeatureKeyFile` in `values.yaml` to specify the file path accessible within the container. If using this repo directly, you can also add the license file to `files/` directory which will be added to the ConfigMap automatically with `helm install`.
+- To supply `feature-key-file` during the deployment, use `featureKeyFilePath` to point to your `features.conf` licence file during `helm install`.
+- Note that `featureKeyFilePath` should be a path on your machine where `helm` client is running.
+- If using mounted volumes to apply the `feature-key-file`, you can use `aerospikeFeatureKeyFile` in `values.yaml` to specify the file path accessible within the container. 
+- If using this repo directly, you can also add the license file to `files/` directory which will be added to the ConfigMap automatically with `helm install`.
 
 Example,
 
