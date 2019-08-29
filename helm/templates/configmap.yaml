@@ -21,9 +21,28 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-conf
+  namespace: {{ .Values.namespace }}
 data:
   on-start.sh: {{ tpl (.Files.Get "files/on-start.sh") . | quote }}
+  
+  # Use dynamically supplied features.conf file and add it to configmap
+  {{ if .Files.Get "files/features.conf" }}
   features.conf: {{ tpl (.Files.Get "files/features.conf") . | quote }}
+  {{ else if (.Values.featureKeyFilePath) }}
+  features.conf: |-
+    {{ .Values.featureKeyFilePath | nindent 4 | trim }}
+  {{ else }}
+  {{ fail "You need to supply your EE license file!!! Use --set-file featureKeyFilePath=<FeatureKeyFilePathOnHelmClientMachine> with helm install" }}
+  {{ end }}
+
   install.sh: {{ tpl (.Files.Get "files/install.sh") . | quote }}
+
+  # Use dynamically supplied aerospike.template.conf over the existing one.
+  {{ if .Files.Get "files/aerospike.template.conf" }}
   aerospike.template.conf: {{ tpl (.Files.Get "files/aerospike.template.conf") . | quote }}
+  {{ end }}
+  {{ if (.Values.confFilePath) }}
+  aerospike.template.conf: |-
+    {{ .Values.confFilePath | nindent 4 | trim }}
+  {{ end }}
 ---

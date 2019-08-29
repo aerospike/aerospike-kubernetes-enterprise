@@ -1,3 +1,5 @@
+#! /bin/bash
+
 # ------------------------------------------------------------------------------
 # Copyright 2012-2019 Aerospike, Inc.
 #
@@ -15,14 +17,33 @@
 # the License.
 # ------------------------------------------------------------------------------
 
-apiVersion: v1
-appVersion: "4.6.0.2"
-description: A Helm chart for Aerospike on Kubernetes
-name: aerospike
-version: 1.0.0
-sources:
-- https://github.com/aerospike/aerospike-server-enterprise.docker
-- https://github.com/aerospike/aerospike-tools.docker
-maintainers:
-- name: spkesan
-  email: kesan@aerospike.com
+
+CONFIG_VOLUME="/etc/aerospike"
+NAMESPACE=${POD_NAMESPACE:-default}
+K8_SERVICE=${SERVICE:-aerospike}
+for i in "$@"
+do
+case $i in
+    -c=*|--config=*)
+    CONFIG_VOLUME="${i#*=}"
+    shift
+    ;;
+    *)
+    # unknown option
+    ;;
+esac
+done
+
+echo installing aerospike.conf into "${CONFIG_VOLUME}"
+mkdir -p "${CONFIG_VOLUME}"
+#chown -R aerospike:aerospike "${CONFIG_VOLUME}"
+apt-get update && apt-get install -y wget
+wget https://storage.googleapis.com/kubernetes-release/pets/peer-finder -O /peer-finder
+cp /configs/on-start.sh /on-start.sh
+cp /configs/aerospike.template.conf "${CONFIG_VOLUME}"/
+if [ -f /configs/features.conf ]; then
+        cp /configs/features.conf "${CONFIG_VOLUME}"/
+fi
+chmod +x /on-start.sh
+chmod +x /peer-finder
+/peer-finder -on-start=/on-start.sh -service=$K8_SERVICE -ns=${NAMESPACE}
