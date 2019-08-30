@@ -1,0 +1,19 @@
+apiVersion: v1
+entries:
+  aerospike-enterprise:
+  - apiVersion: v1
+    appVersion: 4.6.0.2
+    created: "2019-08-30T20:33:25.048419+05:30"
+    description: A Helm chart for Aerospike on Kubernetes
+    digest: 89711524a8b427f633cfe6ca676299bce703eb330b559210a035b8cecc05c6d0
+    maintainers:
+    - email: kesan@aerospike.com
+      name: spkesan
+    name: aerospike-enterprise
+    sources:
+    - https://github.com/aerospike/aerospike-server-enterprise.docker
+    - https://github.com/aerospike/aerospike-tools.docker
+    urls:
+    - https://aerospike.github.io/aerospike-kubernetes-enterprise/aerospike-enterprise-1.0.0.tgz
+    version: 1.0.0
+generated: "2019-08-30T20:33:25.047448+05:30"
