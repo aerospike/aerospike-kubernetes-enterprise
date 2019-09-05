@@ -9,10 +9,16 @@ Implements a dynamically scalable Aerospike cluster using Kubernetes StatefulSet
 
 ## Usage:
 
+### Add Aerospike repository
+
+```sh
+helm repo add aerospike https://aerospike.github.io/aerospike-kubernetes-enterprise
+```
+
 ### Install the chart
 
 ```sh
-helm install --name aerospike-release ./
+helm install --name aerospike-release aerospike/aerospike-enterprise
 ```
 
 You can also set the configuration values as defined in `values.yaml` using `--set` option or provide a `values.yaml` file during `helm install`.
@@ -20,7 +26,7 @@ You can also set the configuration values as defined in `values.yaml` using `--s
 For example,
 
 ```sh
-helm install --set dBReplicas=5 --name aerospike-release ./
+helm install --set dBReplicas=5 --name aerospike-release aerospike/aerospike-enterprise
 ```
 
 ### Apply your own aerospike.conf file or template
@@ -47,7 +53,7 @@ helm install --set dBReplicas=5 --name aerospike-release ./
 
 - Use `confFilePath` during `helm install` with `--set-file` option.
 ```
-helm install --name aerospike-release --set-file confFilePath=/tmp/aerospike_templates/aerospike.template.conf ./
+helm install --name aerospike-release --set-file confFilePath=/tmp/aerospike_templates/aerospike.template.conf aerospike/aerospike-enterprise
 ```
 
 ### Apply feature-key-file (Enterprise licence) file
@@ -60,7 +66,7 @@ helm install --name aerospike-release --set-file confFilePath=/tmp/aerospike_tem
 Example,
 
 ```
-helm install --name aerospike-release --set-file featureKeyFilePath=/secrets/aerospike/features.conf ./
+helm install --name aerospike-release --set-file featureKeyFilePath=/secrets/aerospike/features.conf aerospike/aerospike-enterprise
 ```
 
 ### Storage configuration
@@ -71,33 +77,34 @@ You can configure multiple volume mounts (filesystem type) or device mounts (raw
 ### Test Output:
 
 ```sh
-NAME:   aerospike-release
-LAST DEPLOYED: Tue Aug 27 15:40:36 2019
+NAME:   as-release
+LAST DEPLOYED: Thu Sep  5 22:05:02 2019
 NAMESPACE: default
 STATUS: DEPLOYED
 
 RESOURCES:
 ==> v1/ConfigMap
-NAME                    DATA  AGE
-aerospike-release-conf  3     0s
+NAME             DATA  AGE
+as-release-conf  4     3m2s
 
 ==> v1/Pod(related)
-NAME                 READY  STATUS    RESTARTS  AGE
-aerospike-release-0  0/1    Init:0/1  0         0s
+NAME                               READY  STATUS    RESTARTS  AGE
+as-release-aerospike-enterprise-0  1/1    Running   0         3m2s
+as-release-aerospike-enterprise-1  0/1    Init:0/1  0         90s
 
 ==> v1/Service
-NAME               TYPE       CLUSTER-IP  EXTERNAL-IP  PORT(S)   AGE
-aerospike-release  ClusterIP  None        <none>       3000/TCP  0s
+NAME                             TYPE       CLUSTER-IP  EXTERNAL-IP  PORT(S)   AGE
+as-release-aerospike-enterprise  ClusterIP  None        <none>       3000/TCP  3m2s
 
 ==> v1/StatefulSet
-NAME               READY  AGE
-aerospike-release  0/3    0s
+NAME                             READY  AGE
+as-release-aerospike-enterprise  1/5    3m2s
 ```
 
 ```sh
 $ helm list
-NAME             	REVISION	UPDATED                 	STATUS  	CHART          	APP VERSION	NAMESPACE
-aerospike-release	1       	Tue Aug 27 15:40:36 2019	DEPLOYED	aerospike-1.0.0	4.6.0.2    	default  
+NAME      	REVISION	UPDATED                 	STATUS  	CHART                     	APP VERSION	NAMESPACE
+as-release	1       	Thu Sep  5 22:05:02 2019	DEPLOYED	aerospike-enterprise-4.6.0	4.6.0.2    	default  
 ```
 
 ### Configuration
@@ -120,10 +127,3 @@ aerospike-release	1       	Tue Aug 27 15:40:36 2019	DEPLOYED	aerospike-1.0.0	4.6
 | `resources`                        | Resource configuration (`requests` and `limits`)                      | `{}` (nil)                   |
 | `confFilePath`                     | Custom aerospike.conf file path on helm client machine (To be used during the runtime, `helm install` .. etc)| `not defined`|
 | `featureKeyFilePath`               | Feature Key File (Enterprise License) file location on helm client machine (To be used during the runtime, `helm install` .. etc). | `not defined` |
-
-### To package the chart,
-
-```sh
-helm package ./
-```
-Note that the directory name and Chart name must match.
