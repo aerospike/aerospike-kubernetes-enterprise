@@ -115,7 +115,7 @@ as-release	1       	Thu Sep  5 22:05:02 2019	DEPLOYED	aerospike-enterprise-4.6.0
 | `dBReplicas`                       | Number of Aerospike nodes or pods in the cluster                      |   `1`                        |
 | `terminationGracePeriodSeconds`    | Wait time to forceful shutdown of a container                         |    `30`                      |
 | `image.repository`                 | Aerospike Server Docker Image                                         | `aerospike/aerospike-server-enterprise` |
-| `image.tag`                        | Aerospike Server Docker Image Tag                                     | `4.6.0.2`                    |
+| `image.tag`                        | Aerospike Server Docker Image Tag                                     | `4.6.0.4`                    |
 | `toolsImage.repository`            | Aerospike Tools Docker Image                                          | `aerospike/aerospike-tools`  |
 | `toolsImage.tag`                   | Aerospike Tools Docker Image Tag                                      | `3.21.1`                     |
 | `aerospikeNamespace`               | Aerospike Namespace name                                              | `test`                       |
