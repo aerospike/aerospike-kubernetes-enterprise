@@ -56,7 +56,7 @@ spec:
               command:
               - /bin/sh
               - -c
-              {{- $security := .Values.securityAerospike }}
+              {{- $security := .Values.aerospikeSecurity }}
               {{- if $security.enabled }}
               - "while true; do finished=0; for part in $( asadm -U {{ $security.aerospikeUsername }} -P {{ $security.aerospikePassword }} --no-config-file -e 'asinfo -v statistics -l' | grep migrate_partitions_remaining | cut -d= -f2); do if [ $part != 0 ]; then finished=0; break; fi; finished=1; done; if [ $finished != 1 ]; then sleep 15; else exit 0; fi; done"
               {{- else }}
@@ -67,7 +67,7 @@ spec:
             command:
             - /bin/sh
             - -c
-            {{- $security := .Values.securityAerospike }}
+            {{- $security := .Values.aerospikeSecurity }}
             {{- if $security.enabled }}
             - "asinfo -U {{ $security.aerospikeUsername }} -P {{ $security.aerospikePassword }} -v build"
             {{- else }}
