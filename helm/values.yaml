@@ -42,7 +42,7 @@ aerospikeFeatureKeyFile: ""
 aerospikeDefaultTTL: ""
 
 ### Aerospike Security configuration
-# securityAerospike:
+# aerospikeSecurity:
 #   enabled: false
 #   aerospikeUsername: "admin"
 #   aerospikePassword: "admin"

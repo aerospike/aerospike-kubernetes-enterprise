@@ -60,7 +60,7 @@ helm install --name aerospike-release --set-file confFilePath=/tmp/aerospike_tem
 
 - To supply `feature-key-file` during the deployment, use `featureKeyFilePath` to point to your `features.conf` licence file during `helm install`.
 - Note that `featureKeyFilePath` should be a path on your machine where `helm` client is running.
-- If using mounted volumes to apply the `feature-key-file`, you can use `aerospikeFeatureKeyFile` in `values.yaml` to specify the file path accessible within the container. 
+- If using mounted volumes to apply the `feature-key-file`, you can use `aerospikeFeatureKeyFile` in `values.yaml` to specify the file path accessible within the container.
 - If using this repo directly, you can also add the license file to `files/` directory which will be added to the ConfigMap automatically with `helm install`.
 
 Example,
@@ -121,7 +121,10 @@ as-release	1       	Thu Sep  5 22:05:02 2019	DEPLOYED	aerospike-enterprise-4.6.0
 | `aerospikeNamespace`               | Aerospike Namespace name                                              | `test`                       |
 | `aerospikeNamespaceMemoryGB`       | Aerospike Namespace Memory in GB                                      | `1`                          |
 | `aerospikeReplicationFactor`       | Aerospike Namespace Replication Factor                                | `2`                          |
-| `aerospikeDefaultTTL`              | Aerospike Namespace Record default TTL                                | `30d` (days)                  |
+| `aerospikeDefaultTTL`              | Aerospike Namespace Record default TTL                                | `30d` (days)                 |
+| `aerospikeSecurity.enabled`		 	| To use Aerospike access control configuration    					 | `false`					   	|
+| `aerospikeSecurity.aerospikeUsername` | Aerospike User Name to access the cluster     					 | `admin`					   	|
+| `aerospikeSecurity.aerospikePassword`	| Aerospike User Password to access the cluster     				 | `admin`					   	|
 | `persistenceStorage`               | Define Peristent Volumes to be used (Map - to define multiple volumes)| `{}` (nil)                   |
 | `volumes`                          | Define volumes section and template to be used                        | `volume.mountPath: /opt/aerospike/data`,<br />`volume.name: datadir`,<br />`volume.template: emptyDir: {}`|
 | `resources`                        | Resource configuration (`requests` and `limits`)                      | `{}` (nil)                   |
