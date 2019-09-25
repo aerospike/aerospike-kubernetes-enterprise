@@ -41,6 +41,12 @@ aerospikeReplicationFactor: "2"
 aerospikeFeatureKeyFile: ""
 aerospikeDefaultTTL: ""
 
+### Aerospike Security configuration
+# securityAerospike:
+#   enabled: false
+#   aerospikeUsername: "admin"
+#   aerospikePassword: "admin"
+
 ### Deployment specific configurations
 
 persistenceStorage: {}
