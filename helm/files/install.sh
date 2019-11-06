@@ -38,7 +38,7 @@ echo installing aerospike.conf into "${CONFIG_VOLUME}"
 mkdir -p "${CONFIG_VOLUME}"
 #chown -R aerospike:aerospike "${CONFIG_VOLUME}"
 apt-get update && apt-get install -y wget
-wget https://storage.googleapis.com/kubernetes-release/pets/peer-finder -O /peer-finder
+wget https://github.com/aerospike/aerospike-kubernetes-enterprise/raw/master/docs/peer-finder -O /peer-finder
 cp /configs/on-start.sh /on-start.sh
 cp /configs/aerospike.template.conf "${CONFIG_VOLUME}"/
 if [ -f /configs/features.conf ]; then
@@ -46,4 +46,4 @@ if [ -f /configs/features.conf ]; then
 fi
 chmod +x /on-start.sh
 chmod +x /peer-finder
-/peer-finder -on-start=/on-start.sh -service=$K8_SERVICE -ns=${NAMESPACE}
+/peer-finder -on-start=/on-start.sh -service=$K8_SERVICE -ns=${NAMESPACE} -domain=cluster.local
