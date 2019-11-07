@@ -26,7 +26,7 @@ You can also set the configuration values as defined in `values.yaml` using `--s
 For example,
 
 ```sh
-helm install --set dBReplicas=5 --name aerospike-release aerospike/aerospike-enterprise
+helm install --set dbReplicas=5 --name aerospike-release aerospike/aerospike-enterprise
 ```
 
 ### Apply your own aerospike.conf file or template
@@ -60,7 +60,7 @@ helm install --name aerospike-release --set-file confFilePath=/tmp/aerospike_tem
 
 - To supply `feature-key-file` during the deployment, use `featureKeyFilePath` to point to your `features.conf` licence file during `helm install`.
 - Note that `featureKeyFilePath` should be a path on your machine where `helm` client is running.
-- If using mounted volumes to apply the `feature-key-file`, you can use `aerospikeFeatureKeyFile` in `values.yaml` to specify the file path accessible within the container.
+- If using mounted volumes to apply the `feature-key-file`, you can use `aerospikeFeatureKeyFilePath` in `values.yaml` to specify the file path accessible within the container.
 - If using this repo directly, you can also add the license file to `files/` directory which will be added to the ConfigMap automatically with `helm install`.
 
 Example,
@@ -112,16 +112,23 @@ as-release	1       	Thu Sep  5 22:05:02 2019	DEPLOYED	aerospike-enterprise-4.6.0
 | Parameter                          | Description                                                           | Default Value                |
 | -----------------------------------|:--------------------------------------------------------------------: |:----------------------------:|
 | `namespace`                        | Kubernetes Namespace                                                  |  `default`                   |
-| `dBReplicas`                       | Number of Aerospike nodes or pods in the cluster                      |   `1`                        |
-| `terminationGracePeriodSeconds`    | Wait time to forceful shutdown of a container                         |    `30`                      |
+| `dbReplicas`                       | Number of Aerospike nodes or pods in the cluster                      |   `3`                        |
+| `terminationGracePeriodSeconds`    | Wait time to forceful shutdown of a container                         |   `120`                      |
 | `image.repository`                 | Aerospike Server Docker Image                                         | `aerospike/aerospike-server-enterprise` |
-| `image.tag`                        | Aerospike Server Docker Image Tag                                     | `4.6.0.4`                    |
+| `image.tag`                        | Aerospike Server Docker Image Tag                                     | `4.7.0.2`                    |
 | `toolsImage.repository`            | Aerospike Tools Docker Image                                          | `aerospike/aerospike-tools`  |
-| `toolsImage.tag`                   | Aerospike Tools Docker Image Tag                                      | `3.21.1`                     |
+| `toolsImage.tag`                   | Aerospike Tools Docker Image Tag                                      | `3.22.0`                     |
 | `aerospikeNamespace`               | Aerospike Namespace name                                              | `test`                       |
 | `aerospikeNamespaceMemoryGB`       | Aerospike Namespace Memory in GB                                      | `1`                          |
 | `aerospikeReplicationFactor`       | Aerospike Namespace Replication Factor                                | `2`                          |
-| `aerospikeDefaultTTL`              | Aerospike Namespace Record default TTL                                | `30d` (days)                 |
+| `aerospikeDefaultTTL`              | Aerospike Namespace Record default TTL                                | `0` (Never Expire)           |
+| `aerospikeFeatureKeyFilePath`      | Aerospike `feature-key-file` path accessible from within the container (if using mounted volumes to share feature key file)| `not defined` |
+| `autoRolloutConfig`		   	     | Rollout ConfigMap/Secrets changes on 'helm upgrade'    			     | `false`					   	|
+| `hostNetworking`		 			 | Enable `hostNetwork`. Allows Pods to access host network.			 	 | `false`					   	|
+| `platform`		 				 | Set platform. Use with `hostNetworking` configuration to enable client applications outside the network to connect to Aerospike Cluster. Supported values - `eks` or `gke` or `none`    		 | `none`					   	|
+| `antiAffinity`		 			 | Enable `PodAntiAffinity` rule to schedule one pod per node. Supported values - `off`, `soft`, `hard` | `off` |
+| `antiAffinityWeight`		 		 | 'weight' in range 1-100 for "soft" antiAffinity option    			 | `1`					   		|
+| `affinity`		 				 | Define custom `nodeAffinity`/`podAffinity`/`podAntiAffinity` rules	 | `{}` (nil)				   	|
 | `aerospikeSecurity.enabled`		 	| To use Aerospike access control configuration    					 | `false`					   	|
 | `aerospikeSecurity.aerospikeUsername` | Aerospike User Name to access the cluster     					 | `admin`					   	|
 | `aerospikeSecurity.aerospikePassword`	| Aerospike User Password to access the cluster     				 | `admin`					   	|
@@ -131,6 +138,6 @@ as-release	1       	Thu Sep  5 22:05:02 2019	DEPLOYED	aerospike-enterprise-4.6.0
 | `confFilePath`                     | Custom aerospike.conf file path on helm client machine (To be used during the runtime, `helm install` .. etc)| `not defined`|
 | `featureKeyFilePath`               | Feature Key File (Enterprise License) file location on helm client machine (To be used during the runtime, `helm install` .. etc). | `not defined` |
 
-Note that the namespace related configurations (`aerospikeNamespace`, `aerospikeNamespaceMemoryGB`, `aerospikeReplicationFactor` and `aerospikeDefaultTTL`) are intended for default single namespace configuration. 
+Note that the namespace related configurations (`aerospikeNamespace`, `aerospikeNamespaceMemoryGB`, `aerospikeReplicationFactor` and `aerospikeDefaultTTL`) are intended for default single namespace configuration.
 
 If using multiple namespaces, these config items can be ignored and a separate `aerospike.conf` file or template with multiple namespace configuration can be used.
