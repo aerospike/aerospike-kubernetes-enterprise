@@ -15,17 +15,22 @@
 # the License.
 # ------------------------------------------------------------------------------
 
+{{- if .Values.enableAerospikeMonitoring }}
 apiVersion: v1
-appVersion: 4.8.0.5
-description: A Helm chart for Aerospike Server Enterprise Edition on Kubernetes
-name: aerospike-enterprise
-version: 4.8.0
-icon: https://avatars0.githubusercontent.com/u/2214313?s=200&v=4
-sources:
-- https://github.com/aerospike/aerospike-server-enterprise.docker
-- https://github.com/aerospike/aerospike-kubernetes-enterprise
-- https://github.com/aerospike/aerospike-kubernetes-init
-- https://github.com/aerospike/aerospike-prometheus-exporter
-maintainers:
-- name: spkesan
-  email: kesan@aerospike.com
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-alertmanager-config
+  labels:
+    app: {{ template "aerospike.name" . }}-alertmanager
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+    app.kubernetes.io/component: alertmanager
+data:
+  {{ if .Files.Get "files/alertmanager.yaml" }}
+  alertmanager.yaml: {{ tpl (.Files.Get "files/alertmanager.yaml") . | quote }}
+  {{ end }}
+  {{ if (.Values.alertmanager.alertmanagerConfFilePath) }}
+  alertmanager.yaml: |-
+    {{ .Values.alertmanager.alertmanagerConfFilePath | nindent 4 | trim }}
+  {{ end }}
+{{- end }}

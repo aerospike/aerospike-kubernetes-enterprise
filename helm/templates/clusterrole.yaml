@@ -14,18 +14,33 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 # ------------------------------------------------------------------------------
-
-apiVersion: v1
-appVersion: 4.8.0.5
-description: A Helm chart for Aerospike Server Enterprise Edition on Kubernetes
-name: aerospike-enterprise
-version: 4.8.0
-icon: https://avatars0.githubusercontent.com/u/2214313?s=200&v=4
-sources:
-- https://github.com/aerospike/aerospike-server-enterprise.docker
-- https://github.com/aerospike/aerospike-kubernetes-enterprise
-- https://github.com/aerospike/aerospike-kubernetes-init
-- https://github.com/aerospike/aerospike-prometheus-exporter
-maintainers:
-- name: spkesan
-  email: kesan@aerospike.com
+---
+{{- if .Values.rbac.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app: {{ template "aerospike.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+  name: {{ template "aerospike.fullname" . }}
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+      - pods
+      - statefulsets
+      - configmaps
+      - secrets
+      - services
+      - nodes
+      - nodes/metrics
+      - endpoints
+    verbs:
+      - list
+      - watch
+      - get
+  - nonResourceURLs: ["/metrics"]
+    verbs: ["get"]
+{{- end -}}

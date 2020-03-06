@@ -15,17 +15,27 @@
 # the License.
 # ------------------------------------------------------------------------------
 
+{{- if .Values.enableLoadBalancerServices }}
+{{- $dot := . }}
+{{ range $podIndex := until (int .Values.dbReplicas) -}}
+---
 apiVersion: v1
-appVersion: 4.8.0.5
-description: A Helm chart for Aerospike Server Enterprise Edition on Kubernetes
-name: aerospike-enterprise
-version: 4.8.0
-icon: https://avatars0.githubusercontent.com/u/2214313?s=200&v=4
-sources:
-- https://github.com/aerospike/aerospike-server-enterprise.docker
-- https://github.com/aerospike/aerospike-kubernetes-enterprise
-- https://github.com/aerospike/aerospike-kubernetes-init
-- https://github.com/aerospike/aerospike-prometheus-exporter
-maintainers:
-- name: spkesan
-  email: kesan@aerospike.com
+kind: Service
+metadata:
+  name: "loadbalancer-{{ $.Release.Name }}-{{ $.Chart.Name }}-{{ $podIndex }}"
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app: {{ template "aerospike.name" $dot }}
+    chart: {{ $.Chart.Name }}-{{ $.Chart.Version }}
+    release: {{ $.Release.Name }}
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  ports:
+  - port: {{ $.Values.aerospikeClientPort | default 3000 }}
+    targetPort: {{ $.Values.aerospikeClientPort | default 3000 }}
+  selector:
+    statefulset.kubernetes.io/pod-name: "{{ $.Release.Name }}-{{ $.Chart.Name }}-{{ $podIndex }}"
+{{ end -}}
+{{- end }}
+---

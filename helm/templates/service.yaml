@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Copyright 2012-2019 Aerospike, Inc.
+# Copyright 2012-2020 Aerospike, Inc.
 #
 # Portions may be licensed to Aerospike, Inc. under one or more contributor
 # license agreements.
@@ -22,16 +22,20 @@ metadata:
   annotations:
     service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
   name: {{ template "aerospike.fullname" . }}
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
-      app: {{ template "aerospike.name" . }}
-      chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-      release: {{ .Release.Name }}
+    app: {{ template "aerospike.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
 spec:
   publishNotReadyAddresses: true
   ports:
-  - port: 3000
+  - port: {{ .Values.aerospikeClientPort | default 3000 }}
     name: aerospike-client
+  {{- if .Values.enableAerospikeMonitoring }}
+  - port: {{ .Values.exporter.agentBindPort | default 9145 }}
+    name: aerospike-prometheus-exporter
+  {{- end }}
   # *.aerospike.default.svc.cluster.local
   clusterIP: None
   selector:
