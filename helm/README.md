@@ -140,9 +140,9 @@ asadm -h <ExternalIP> -p 3000 --services-alternate
 | `dbReplicas`                       | Number of Aerospike nodes or pods in the cluster                      |   `3`                        |
 | `terminationGracePeriodSeconds`    | Wait time to forceful shutdown of a container                         |   `120`                      |
 | `image.repository`                 | Aerospike Server Docker Image                                         | `aerospike/aerospike-server-enterprise` |
-| `image.tag`                        | Aerospike Server Docker Image Tag                                     | `4.7.0.5`                    |
-| `toolsImage.repository`            | Aerospike Tools Docker Image                                          | `aerospike/aerospike-tools`  |
-| `toolsImage.tag`                   | Aerospike Tools Docker Image Tag                                      | `3.22.0`                     |
+| `image.tag`                        | Aerospike Server Docker Image Tag                                     | `4.6.0.12`                   |
+| `initImage.repository`            | Aerospike Kubernetes Init Container Image                              | `aerospike/aerospike-kubernetes-init`  |
+| `initImage.tag`                   | Aerospike Kubernetes Init Container Image Tag                          | `1.0.0`                     |
 | `aerospikeNamespace`               | Aerospike Namespace name                                              | `test`                       |
 | `aerospikeNamespaceMemoryGB`       | Aerospike Namespace Memory in GB                                      | `1`                          |
 | `aerospikeReplicationFactor`       | Aerospike Namespace Replication Factor                                | `2`                          |
