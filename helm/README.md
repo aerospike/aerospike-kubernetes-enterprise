@@ -21,18 +21,22 @@ helm repo add aerospike https://aerospike.github.io/aerospike-kubernetes-enterpr
 helm install aerospike-release aerospike/aerospike-enterprise --set-file featureKeyFilePath=/secrets/aerospike/features.conf
 ```
 
-User can set any configuration values defined in `values.yaml` using `--set` option or provide a `values.yaml` file using `-f` option with `helm install`.
+All the configurations defined in [`values.yaml`](values.yaml) or in the [configuration section](#configuration) can be set using `--set` or `--set-file` option. A custom `values.yaml` file can also be provided using `-f` option.
 
 For example,
 
 ```sh
-helm install aerospike-release aerospike/aerospike-enterprise --set dbReplicas=5 --set-file featureKeyFilePath=/secrets/aerospike/features.conf
+helm install aerospike-release aerospike/aerospike-enterprise \
+			 --set dbReplicas=5 \
+			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf
 ```
 
 #### For Helm v2,
 
 ```sh
-helm install --name aerospike-release aerospike/aerospike-enterprise --set dbReplicas=5 --set-file featureKeyFilePath=/secrets/aerospike/features.conf
+helm install --name aerospike-release aerospike/aerospike-enterprise \
+			 --set dbReplicas=5 \
+			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf
 ```
 
 ### Use a custom aerospike.conf file or template
@@ -59,28 +63,31 @@ helm install --name aerospike-release aerospike/aerospike-enterprise --set dbRep
 	.....
 	```
 
-- Use `confFilePath` on `helm install` with `--set-file` option.
+- `confFilePath` can be set using `--set-file` option,
 	```sh
-	helm install aerospike-release aerospike/aerospike-enterprise --set-file confFilePath=/tmp/aerospike_templates/aerospike.template.conf
+	helm install aerospike-release aerospike/aerospike-enterprise \
+				 --set-file confFilePath=/tmp/aerospike_templates/aerospike.template.conf \
+				 --set-file featureKeyFilePath=/secrets/aerospike/features.conf
 	```
 
 ### Apply feature-key-file (enterprise licence) file
 
-- To add a `feature-key-file` during the deployment, set `featureKeyFilePath` to point to the `features.conf` licence file.
+- To add a `feature-key-file` at the time of the deployment, set `featureKeyFilePath` to point to a `features.conf` licence file.
 
 	> `featureKeyFilePath` should be a file path on helm "client" machine (where the user is running the command `helm install`).
 
 	Example,
 	```sh
-	helm install aerospike-release aerospike/aerospike-enterprise --set-file featureKeyFilePath=/secrets/aerospike/features.conf
+	helm install aerospike-release aerospike/aerospike-enterprise \
+				 --set-file featureKeyFilePath=/secrets/aerospike/features.conf
 	```
 
-- If a mounted volume is being used to provide the `feature-key-file`, user can set `aerospikeFeatureKeyFilePath` to specify the file path of the license key file accessible within the container.
-- User can also clone this repository, add the license file to `files/` directory which will then automatically be added to the ConfigMap on `helm install`.
+- If a mounted volume is used to provide the `feature-key-file`, set `aerospikeFeatureKeyFilePath` to the file path accessible within the container.
+- A license file (`features.conf`) can also be added to `files/` directory of this repo (if git cloned) which will then automatically be loaded into the ConfigMap on `helm install`.
 
 ### Storage configuration
 
-User can configure multiple volume mounts (filesystem type) or device mounts (raw block device) or both in `values.yaml`. Check below [configuration section](#configuration) and [`values.yaml`](values.yaml) file in [this repository](https://github.com/aerospike/aerospike-kubernetes-enterprise/tree/master/helm) for more details.
+Aerospike helm chart allows multiple volume mounts (filesystem type) and device mounts (raw block device) to be configured and used with Aerospike Statefulset. Check below [configuration section](#configuration) or [`values.yaml`](https://github.com/aerospike/aerospike-kubernetes-enterprise/blob/master/helm/values.yaml) file for more details.
 
 
 ### Test Output:
@@ -114,12 +121,12 @@ statefulset.apps/aerospike-release-aerospike-enterprise   3/3     49m
 ```sh
 $ helm list
 NAME             	REVISION	UPDATED                 	STATUS  	CHART                     	APP VERSION	NAMESPACE
-aerospike-release	1       	Fri Mar  6 15:50:33 2020	DEPLOYED	aerospike-enterprise-4.8.0	4.8.0.5   	default
+aerospike-release	1       	Fri Mar  6 15:50:33 2020	DEPLOYED	aerospike-enterprise-4.8.0	4.8.0.6   	default
 ```
 
 ### Expose Aerospike Cluster
 
-Aerospike Cluster can be exposed to client applications or to XDR clients outside the K8s network by enabling,
+Aerospike Cluster can be exposed to client applications or to XDR clients which are outside the K8s network by enabling,
 - Host Networking
 - NodePort Services Per Pod
 - LoadBalancer Services Per Pod
@@ -137,23 +144,23 @@ For example,
 
 ```sh
 helm install aerospike-release aerospike/aerospike-enterprise \
-	 --set dbReplicas=4 \
-	 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
-	 --set hostNetworking=true \
-	 --set platform=gke
+	 		 --set dbReplicas=4 \
+	 		 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
+	 		 --set hostNetworking=true \
+	 		 --set platform=gke
 ```
 
 For Helm v2,
 
 ```sh
 helm install --name aerospike-release aerospike/aerospike-enterprise \
-	 --set dbReplicas=4 \
-	 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
-	 --set hostNetworking=true \
-	 --set platform=gke
+	 		 --set dbReplicas=4 \
+	 		 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
+	 		 --set hostNetworking=true \
+	 		 --set platform=gke
 ```
 
-Client applications can connect to the Aerospike cluster using instance's external IP (if available) or else by simply using host IP.
+Client applications can connect to the Aerospike cluster using instance's external IP (if available) or by using host IP.
 
 ```sh
 asadm -h <ExternalIP> -p 3000 --services-alternate
@@ -163,16 +170,16 @@ asadm -h <ExternalIP> -p 3000 --services-alternate
 
 NodePort type exposes the Service on each K8s Node’s IP at a static port (the `NodePort`). Applications will be able to connect to the NodePort Service from outside the K8s cluster by using `<NodeIP>:<NodePort>`.
 
-> With NodePort type services, it allows multiple pods per K8s host as well as expose each aerospike pod.
+> With NodePort type services, it allows multiple aerospike pods per K8s host and at the same time expose each aerospike pod.
 
 To enable `NodePort` services per pod, `enableNodePortServices` option must be set to `true`.
-Aerospike helm chart will automatically create a `NodePort` type service for each aerospike pod at the time of deployment. Applications can connect to the Aerospike cluster using any one of `<NodeIP>:<NodePort>` as seed IP and Port.
+Aerospike helm chart will automatically create a `NodePort` type service for each aerospike pod at the time of deployment. Applications can connect to the Aerospike cluster using any one of the `<NodeIP>:<NodePort>` as a seed IP and Port.
 
 Setting `platform` will fetch external IP of the instances (if any) and add it to [`alternate-access-address`](https://www.aerospike.com/docs/reference/configuration/index.html#alternate-access-address) in `aerospike.conf`.
 
-> It is recommended to use `helm upgrade` command to perform scale-up/scale-down when NodePort services are enabled.
+> Use `helm upgrade` command to perform scale-up/scale-down when NodePort services are enabled.
 
-User must specify a service account with appropriate permissions to query the API server and read the `Service` type resources. An existing service account can be specified using `rbac.serviceAccountName`. User can also set `rbac.create` to `true` for which Aerospike helm chart will automatically create a new serviceAccount with appropriate permissions and use it for the statefulset deployment.
+A service account with appropriate permissions is required to query the API server and read the `Service` type resources. An existing service account can be specified using `rbac.serviceAccountName`. To let Aerospike helm chart create a new `ServiceAccount` with appropriate `ClusterRole` set `rbac.create` to `true`. This `ServiceAccount` will be used with Aerospike Statefulset, and if monitoring is enabled, also with Prometheus, Grafana and Alertmanager Statefulsets.
 
 Example,
 
@@ -198,7 +205,7 @@ helm install --name aerospike-release aerospike/aerospike-enterprise \
 
 LoadBalancer type exposes the service externally using the cloud provider’s load balancer. A new external network load balancer is provisioned.
 
-> With LoadBalancer type services, it allows multiple pods per K8s host as well as expose each pod.
+> With LoadBalancer type services, it allows multiple aerospike pods per K8s host and at the same time expose each aerospike pod.
 
 To enable `LoadBalancer` services per pod, `enableLoadBalancerServices` option must be set to `true`.
 Aerospike helm chart will automatically create a `LoadBalancer` type service for each aerospike pod at the time of deployment.
@@ -209,15 +216,15 @@ Applications can connect to the Aerospike cluster using `<LoadBalancerIngressIP>
 asadm -h <LoadBalancerIngressIP> -p <LoadBalancerPort> --services-alternate
 ```
 
-> It is recommended to use `helm upgrade` command to perform scale-up/scale-down when LoadBalancer type services are enabled.
+> Use `helm upgrade` command to perform scale-up/scale-down when LoadBalancer type services are enabled.
 
-User must specify a service account with appropriate permissions to query the API server and read the `Service` type resources. An existing service account can be specified using `rbac.serviceAccountName`. User can also set `rbac.create` to `true` for which Aerospike helm chart will automatically create a new serviceAccount with appropriate permissions and use it for the statefulset deployment.
+A service account with appropriate permissions is required to query the API server and read the `Service` type resources. An existing service account can be specified using `rbac.serviceAccountName`. To let Aerospike helm chart create a new `ServiceAccount` with appropriate `ClusterRole` set `rbac.create` to `true`. This `ServiceAccount` will be used with Aerospike Statefulset, and if monitoring is enabled, also with Prometheus, Grafana and Alertmanager Statefulsets.
 
 Example,
 
 ```sh
 helm install aerospike-release aerospike/aerospike-enterprise \
-			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf
+			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
 		 	 --set dbReplicas=5 \
 			 --set rbac.create=true \
 			 --set enableLoadBalancerServices=true
@@ -227,7 +234,7 @@ For Helm v2,
 
 ```sh
 helm install --name aerospike-release aerospike/aerospike-enterprise \
-			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf
+			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
 			 --set dbReplicas=5 \
 			 --set rbac.create=true \
 			 --set enableLoadBalancerServices=true
@@ -235,16 +242,15 @@ helm install --name aerospike-release aerospike/aerospike-enterprise \
 
 ### **ClusterIP Services with External IPs**
 
-`ClusterIP` type exposes the service on a cluster-internal IP. With external IPs set, the service can be accessed from its external endpoint.
+`ClusterIP` type exposes the service on a cluster-internal IP. With external IPs set, the service can be accessed from an external endpoint.
 
-With `enableExternalIpServices` option enabled, Aerospike helm chart will create a `ClusterIP` type service for each aerospike pod at the time of deployment. User can specify only one external IP and Port.
-The external endpoints can be specified using `externalIpEndpoints` option. Check [`values.yaml`](values.yaml).
+With `enableExternalIpServices` option enabled, Aerospike helm chart will create a `ClusterIP` type service for each aerospike pod at the time of deployment. The external endpoints can be specified using `externalIpEndpoints` option.
 
-> It is recommended to use `helm upgrade` command to perform scale-up/scale-down when ClusterIP-ExternalIP services are enabled.
+> Use `helm upgrade` command to perform scale-up/scale-down when ClusterIP-ExternalIP services are enabled.
 
-> With `enableExternalIpService` enabled, user must specify number of endpoints equal to the number of Aerospike nodes/pods (`dbReplicas`).
+> Number of endpoints should be equal to the number of Aerospike pods (`dbReplicas`). Only one external IP and Port per Service can be specified.
 
-User must specify a service account with appropriate permissions to query the API server and read the `Service` type resources. An existing service account can be specified using `rbac.serviceAccountName`. User can also set `rbac.create` to `true` for which Aerospike helm chart will automatically create a new serviceAccount with appropriate permissions and use it for the statefulset deployment.
+A service account with appropriate permissions is required to query the API server and read the `Service` type resources. An existing service account can be specified using `rbac.serviceAccountName`. To let Aerospike helm chart create a new `ServiceAccount` with appropriate `ClusterRole` set `rbac.create` to `true`. This `ServiceAccount` will be used with Aerospike Statefulset, and if monitoring is enabled, also with Prometheus, Grafana and Alertmanager Statefulsets.
 
 Example,
 
@@ -259,7 +265,7 @@ helm install aerospike-release aerospike/aerospike-enterprise \
 			 --set externalIpEndpoints[1].IP=10.160.15.224 \
 			 --set externalIpEndpoints[1].Port=7002 \
 			 --set externalIpEndpoints[2].IP=10.160.15.223 \
-			 --set externalIpEndpoints[2].Port=8001
+			 --set externalIpEndpoints[2].Port=8001 \
 			 --set externalIpEndpoints[3].IP=10.160.15.223 \
 			 --set externalIpEndpoints[3].Port=8002
 ```
@@ -277,7 +283,7 @@ helm install --name aerospike-release aerospike/aerospike-enterprise \
 			 --set externalIpEndpoints[1].IP=10.160.15.224 \
 			 --set externalIpEndpoints[1].Port=7002 \
 			 --set externalIpEndpoints[2].IP=10.160.15.223 \
-			 --set externalIpEndpoints[2].Port=8001
+			 --set externalIpEndpoints[2].Port=8001 \
 			 --set externalIpEndpoints[3].IP=10.160.15.223 \
 			 --set externalIpEndpoints[3].Port=8002
 ```
@@ -286,18 +292,47 @@ helm install --name aerospike-release aerospike/aerospike-enterprise \
 
 Aerospike Helm Chart provides Aerospike Monitoring Stack which includes an Aerospike prometheus exporter (sidecar), Prometheus statefulset, Grafana statefulset and Alertmanager statefulset.
 
-User can enable Aerospike Monitoring by setting `enableAerospikeMonitoring` option to `true`.
+Aerospike Monitoring can be enabled by setting `enableAerospikeMonitoring` option to `true`.
 
-To add a custom Aerospike alert rules configuraton file, use option `--set-file prometheus.aerospikeAlertRulesFilePath`.
+```sh
+helm install aerospike-release aerospike/aerospike-enterprise \
+			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
+			 --set rbac.create=true \
+			 --set enableAerospikeMonitoring=true
+```
+
+For Helm v2,
+
+```sh
+helm install --name aerospike-release aerospike/aerospike-enterprise \
+			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
+			 --set rbac.create=true \
+			 --set enableAerospikeMonitoring=true
+```
+
+Use option `--set-file prometheus.aerospikeAlertRulesFilePath` to add a custom aerospike alert rules configuration file.
 
 > `prometheus.aerospikeAlertRulesFilePath` should be a file path on helm "client" machine (where the user is running 'helm install')
 
-To add an alertmanager configuration file, use option `--set-file alertmanager.alertmanagerConfFilePath`.
+Use option `--set-file alertmanager.alertmanagerConfFilePath` to add an alertmanager configuration file.
 
 > `alertmanager.alertmanagerConfFilePath` should be a file path on helm "client" machine (where the user is running 'helm install')
 
-Check below [configuration section](#configuration) and [`values.yaml`](values.yaml) file in [this repository](https://github.com/aerospike/aerospike-kubernetes-enterprise/tree/master/helm) for more details on other configuration of the `Aerospike Prometheus Exporter`, `Prometheus`, `Grafana` and `Alertmanager`.
+Check the below [configuration section](#configuration) or [`values.yaml`](values.yaml) file for more details on configuration of the `Aerospike Prometheus Exporter`, `Prometheus`, `Grafana` and `Alertmanager`.
 
+### Aerospike's Quiescence Feature
+
+Aerospike Helm Chart (EE) uses Aerospike's ["Quiescence"](https://www.aerospike.com/docs/operations/manage/cluster_mng/quiescing_node/index.html) feature to perform smooth scale down, rolling upgrades and rolling restart across the cluster.
+
+### Aerospike Cluster Security
+
+Aerospike Helm Chart (EE) supports [Aerospike's Access Control](https://www.aerospike.com/docs/operations/configure/security/access-control/index.html).
+
+To work with a security enabled Aerospike configuration, set `security.enabled` to `true` and specify credentials of a user who has "user-admin" privilege (default `admin/admin`) using `security.username` and `security.password` options.
+
+> `security {}` configuration must manually be added to the `aerospike.conf` file and passed in at the time of deployment using `--set-file confFilePath` option.
+
+Aerospike helm chart automatically creates a user named `aerospikeHelm` with `sys-admin` privilege to perform "quiesce"/"recluster" operation on scale down, rolling upgrades and rolling restarts.
 
 ### Configuration
 
@@ -306,7 +341,7 @@ Check below [configuration section](#configuration) and [`values.yaml`](values.y
 | `dbReplicas`                                          | Number of Aerospike nodes or pods in the cluster                                                                                                                                          | `3`                                                                                                                  |
 | `terminationGracePeriodSeconds`                       | Number of seconds to wait after `SIGTERM` before force killing the pod.                                                                                                                   | `120`                                                                                                                |
 | `image.repository`                                    | Aerospike Server Docker Image                                                                                                                                                             | `aerospike/aerospike-server-enterprise`                                                                              |
-| `image.tag`                                           | Aerospike Server Docker Image Tag                                                                                                                                                         | `4.8.0.5`                                                                                                           |
+| `image.tag`                                           | Aerospike Server Docker Image Tag                                                                                                                                                         | `4.8.0.6`                                                                                                           |
 | `initImage.repository`                                | Aerospike Kubernetes Init Container Image                                                                                                                                                 | `aerospike/aerospike-kubernetes-init`                                                                                |
 | `initImage.tag`                                       | Aerospike Kubernetes Init Container Image Tag                                                                                                                                             | `1.0.0`                                                                                                              |
 | `autoGenerateNodeIds`                                 | Auto generate and assign node-id(s) based on Pod's Ordinal Index                                                                                                                          | `false`                                                                                                              |

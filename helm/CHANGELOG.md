@@ -2,6 +2,15 @@
 
 This file documents all notable changes to Aerospike Helm Chart (Enterprise Edition).
 
+## [1.2.1](https://github.com/aerospike/aerospike-kubernetes-enterprise/releases/tag/1.2.1)
+
+- Fixed alertmanager's default dummy configuration to avoid `CrashLoopBackOff`.
+- Improved usage documentation
+- Chart `4.6.0` updated to use Aerospike Server version `4.6.0.13`
+- Chart `4.7.0` updated to use Aerospike Server version `4.7.0.11`
+- Chart `4.8.0` updated to use Aerospike Server version `4.8.0.6`
+
+
 ## [1.2.0](https://github.com/aerospike/aerospike-kubernetes-enterprise/releases/tag/1.2.0)
 
 - Uses new `aerospike/aerospike-kubernetes-init` image
@@ -24,6 +33,7 @@ This file documents all notable changes to Aerospike Helm Chart (Enterprise Edit
 ## [1.1.0](https://github.com/aerospike/aerospike-kubernetes-enterprise/releases/tag/1.1.0)
 - Update Chart `4.7.0` to use Aerospike Server version `4.7.0.5` (appVersion).
 - Update Chart `4.6.0` to use Aerospike Server version `4.6.0.8` (appVersion).
+
 
 ## [1.0.0](https://github.com/aerospike/aerospike-kubernetes-enterprise/releases/tag/1.0.0)
 
