@@ -144,20 +144,20 @@ For example,
 
 ```sh
 helm install aerospike-release aerospike/aerospike-enterprise \
-	 		 --set dbReplicas=4 \
-	 		 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
-	 		 --set hostNetworking=true \
-	 		 --set platform=gke
+			 --set dbReplicas=4 \
+			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
+			 --set hostNetworking=true \
+			 --set platform=gke
 ```
 
 For Helm v2,
 
 ```sh
 helm install --name aerospike-release aerospike/aerospike-enterprise \
-	 		 --set dbReplicas=4 \
-	 		 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
-	 		 --set hostNetworking=true \
-	 		 --set platform=gke
+			 --set dbReplicas=4 \
+			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
+			 --set hostNetworking=true \
+			 --set platform=gke
 ```
 
 Client applications can connect to the Aerospike cluster using instance's external IP (if available) or by using host IP.
@@ -185,8 +185,8 @@ Example,
 
 ```sh
 helm install aerospike-release aerospike/aerospike-enterprise \
-			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf
-		 	 --set dbReplicas=5 \
+			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
+			 --set dbReplicas=5 \
 			 --set rbac.create=true \
 			 --set enableNodePortServices=true
 ```
@@ -195,7 +195,7 @@ For Helm v2,
 
 ```sh
 helm install --name aerospike-release aerospike/aerospike-enterprise \
-			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf
+			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
 			 --set dbReplicas=5 \
 			 --set rbac.create=true \
 			 --set enableNodePortServices=true
@@ -225,7 +225,7 @@ Example,
 ```sh
 helm install aerospike-release aerospike/aerospike-enterprise \
 			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
-		 	 --set dbReplicas=5 \
+			 --set dbReplicas=5 \
 			 --set rbac.create=true \
 			 --set enableLoadBalancerServices=true
 ```
@@ -256,8 +256,8 @@ Example,
 
 ```sh
 helm install aerospike-release aerospike/aerospike-enterprise \
-			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf
-		 	 --set dbReplicas=4 \
+			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
+			 --set dbReplicas=4 \
 			 --set rbac.create=true \
 			 --set enableExternalIpServices=true \
 			 --set externalIpEndpoints[0].IP=10.160.15.224 \
@@ -274,8 +274,8 @@ For Helm v2,
 
 ```sh
 helm install --name aerospike-release aerospike/aerospike-enterprise \
-			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf
-		 	 --set dbReplicas=4 \
+			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
+			 --set dbReplicas=4 \
 			 --set rbac.create=true \
 			 --set enableExternalIpServices=true \
 			 --set externalIpEndpoints[0].IP=10.160.15.224 \
@@ -340,8 +340,9 @@ Aerospike helm chart automatically creates a user named `aerospikeHelm` with `sy
 | ------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------:|
 | `dbReplicas`                                          | Number of Aerospike nodes or pods in the cluster                                                                                                                                          | `3`                                                                                                                  |
 | `terminationGracePeriodSeconds`                       | Number of seconds to wait after `SIGTERM` before force killing the pod.                                                                                                                   | `120`                                                                                                                |
+| `clusterServiceDnsDomain`                             | Kubernetes cluster service DNS domain                                                                                                                                                     | `cluster.local`                                                                                                      |
 | `image.repository`                                    | Aerospike Server Docker Image                                                                                                                                                             | `aerospike/aerospike-server-enterprise`                                                                              |
-| `image.tag`                                           | Aerospike Server Docker Image Tag                                                                                                                                                         | `4.8.0.6`                                                                                                           |
+| `image.tag`                                           | Aerospike Server Docker Image Tag                                                                                                                                                         | `4.8.0.6`                                                                                                            |
 | `initImage.repository`                                | Aerospike Kubernetes Init Container Image                                                                                                                                                 | `aerospike/aerospike-kubernetes-init`                                                                                |
 | `initImage.tag`                                       | Aerospike Kubernetes Init Container Image Tag                                                                                                                                             | `1.0.0`                                                                                                              |
 | `autoGenerateNodeIds`                                 | Auto generate and assign node-id(s) based on Pod's Ordinal Index                                                                                                                          | `false`                                                                                                              |
