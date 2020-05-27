@@ -91,10 +91,10 @@ Note that the `storageclass` configured here is `aerospike-ssds`. We will use th
 
 ### Create and deploy ConfigMap object
 
-- Copy [on-start.sh](../../configs/on-start.sh) and [install.sh](../../configs/install.sh) scripts into the [configmap](configmap) directory. These scripts are used by the init container. 
-- Also, add the `feature-key-file` (Enterprise License) to the [configmap](configmap) directory. Feature-key-file (`features.conf`) is required to run Aerospike Server Enterprise Edition.
+- The [configmap](configmap) directory contains the Aerospike configuration file template for this example - `aerospike.template.conf`.
+- Add the `feature-key-file` (Enterprise License) to the [configmap](configmap) directory. Feature-key-file (`features.conf`) is required to run Aerospike Server Enterprise Edition.
 
-Now the [configmap](configmap) directory will contain four files - `aerospike.template.conf`, `install.sh`, `on-start.sh` and `features.conf`.
+Now the [configmap](configmap) directory will contain two files - `aerospike.template.conf` and `features.conf`.
 
 Create configMap object,
 
