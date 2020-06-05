@@ -182,4 +182,18 @@ entries:
     urls:
     - https://aerospike.github.io/aerospike-kubernetes-enterprise/aerospike-enterprise-4.6.0.tgz
     version: 4.6.0
+  aerospike-rest-client:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2020-06-05T06:50:52.171838+05:30"
+    description: Helm Chart For Aerospike REST Client On Kubernetes
+    digest: b8d43bf3dc7280595c20dcd8ab5d811b53fd4673527fdeb6a488196c33d20974
+    icon: https://avatars0.githubusercontent.com/u/2214313?s=200&v=4
+    name: aerospike-rest-client
+    sources:
+    - https://github.com/aerospike/aerospike-client-rest-kubernetes
+    type: application
+    urls:
+    - https://aerospike.github.io/aerospike-client-rest-kubernetes/aerospike-rest-client-0.1.0.tgz
+    version: 0.1.0
 generated: "2020-05-27T05:12:20.290348+05:30"
