@@ -184,10 +184,10 @@ entries:
     version: 4.6.0
   aerospike-rest-client:
   - apiVersion: v2
-    appVersion: 1.16.0
-    created: "2020-06-05T06:50:52.171838+05:30"
+    appVersion: 1.6.0
+    created: "2020-07-21T11:51:03.730512+05:30"
     description: Helm Chart For Aerospike REST Client On Kubernetes
-    digest: b8d43bf3dc7280595c20dcd8ab5d811b53fd4673527fdeb6a488196c33d20974
+    digest: 77887e205164a6fbde1b51cd7f16f125774fefb024d8b7b87bc6a87e72dbfa12
     icon: https://avatars0.githubusercontent.com/u/2214313?s=200&v=4
     name: aerospike-rest-client
     sources:
