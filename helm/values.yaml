@@ -186,6 +186,16 @@ tolerations: []
 # Node Selector (For Aerospike Pods)
 nodeSelector: {}
 
+# Extra labels for the Aerospike StatefulSet
+labels: {}
+# Extra annotations for the Aerospike StatefulSet
+annotations: {}
+
+# Extra labels for the Aerospike pods
+podLabels: {}
+# Extra annotations for the Aerospike pods
+podAnnotations: {}
+
 # Define storage devices for aerospike nodes (pods)
 persistenceStorage: {}
 #  - mountPath: /opt/aerospike/data
@@ -323,7 +333,7 @@ prometheus:
   # Prometheus docker image
   image:
     repository: prom/prometheus
-    tag: v2.11.1
+    tag: latest
 
   # Define storage for Prometheus data
   persistenceStorage:
@@ -394,7 +404,7 @@ grafana:
   # Grafana docker image
   image:
     repository: grafana/grafana
-    tag: 6.3.2
+    tag: latest
 
   # Grafana statefulset configs
   terminationGracePeriodSeconds: 120
