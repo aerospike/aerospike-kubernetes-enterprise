@@ -19,6 +19,12 @@ This file documents all notable changes to Aerospike Helm Chart (Enterprise Edit
 - Auto generate node-ids is now enabled by default
 - Increased termination grace period to 600 seconds
 - Node-id prefix now configurable
+- Update monitoring stack
+- Allow labels and annotations for pod and statefulset to be configured
+
+### Fixes
+
+- Remove chart version from labels to allow chart upgrades
 
 ### Regular Updates
 

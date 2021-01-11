@@ -37,7 +37,7 @@ metadata:
   namespace: {{ $.Release.Namespace }}
   labels:
     app: {{ template "aerospike.name" $dot }}
-    chart: {{ $.Chart.Name }}-{{ $.Chart.Version }}
+    chart: {{ $.Chart.Name }}
     release: {{ $.Release.Name }}
 spec:
   externalIPs:
@@ -83,7 +83,7 @@ metadata:
   namespace: {{ $.Release.Namespace }}
   labels:
     app: {{ template "aerospike.name" $dot }}
-    chart: {{ $.Chart.Name }}-{{ $.Chart.Version }}
+    chart: {{ $.Chart.Name }}
     release: {{ $.Release.Name }}
 spec:
   externalIPs:
