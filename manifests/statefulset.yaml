@@ -81,6 +81,8 @@ spec:
           value: "$AEROSPIKE_TTL"
         - name: FEATURE_KEY_FILE
           value: "$AEROSPIKE_FEATURE_KEY_FILE"
+        - name: NSUP_PERIOD
+          value: "$AEROSPIKE_NSUP_PERIOD"
         # Downward API:
         - name: MY_POD_NAME
           valueFrom:

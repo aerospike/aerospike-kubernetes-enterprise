@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Copyright 2012-2020 Aerospike, Inc.
+# Copyright 2012-2021 Aerospike, Inc.
 #
 # Portions may be licensed to Aerospike, Inc. under one or more contributor
 # license agreements.
@@ -27,7 +27,7 @@
 dbReplicas: 3 # Also controls number of nodes in the aerospike cluster.
 
 # Number of seconds to wait after SIGTERM before force killing the pod.
-terminationGracePeriodSeconds: 120
+terminationGracePeriodSeconds: 600
 
 # liveness and readiness probe parameters (for aerospike containers)
 livenessProbe: {}
@@ -52,7 +52,7 @@ clusterServiceDnsDomain: cluster.local
 
 image:
   repository: aerospike/aerospike-server-enterprise
-  tag: 5.0.0.4
+  tag: 5.3.0.6
 
 ### -------------------------------
 ### Aerospike init container image
@@ -60,7 +60,7 @@ image:
 
 initImage:
   repository: aerospike/aerospike-kubernetes-init
-  tag: 1.1.0
+  tag: 1.2.0
 
 
 ### ---------------------------------
@@ -68,7 +68,8 @@ initImage:
 ### ---------------------------------
 
 # Auto generate and assign node-id(s) based on Pod's Ordinal Index.
-autoGenerateNodeIds: false
+autoGenerateNodeIds: true
+# nodeIDPrefix: "a" # (optional) must be in hex only
 
 # Default Namespace related configuration
 
@@ -93,15 +94,46 @@ autoGenerateNodeIds: false
 ### Aerospike Cluster Security Configuration
 ### -----------------------------------------
 
-# User must manually add security stanza in supplied aerospike.conf
-# Provide username and password for a user with "user-admin" privilege.
-# A new user "aerospikeHelm" with sys-admin access will be created automatically to manage the cluster.
-
+# Provide 'username' and 'password' for a user with "user-admin" privilege which already exists on the cluster.
+# Default: admin/admin.
+# Specify 'helmUsername' and 'helmPassword' for a "sys-admin" that will be created at the runtime.
 security: {}
   # enabled: false
   # username: "admin"
   # password: "admin"
+  # helmUsername: "helm_operator"
+  # helmPassword: "helm_operator"
+  # authMode: "internal"
 
+# Define TLS certificates
+# 1. Provide base64 encoded version of certificates using format "b64enc:<Base64EncodedStringOfCertificateFile>"
+# OR,
+# 2. Provide file path to certificates accessible inside the container using format "file:<FilePathToCertficateFile>"
+tlsConfig: []
+  # - tlsName: "aerospike-client"
+  #   tlsCAFile: "b64enc:LS0tLS1CRUdJTiBDCACERT"
+  #   tlsCertFile: "b64enc:Q2VydGlmaWNhdGCERT"
+  #   tlsKeyFile: "b64enc:LS0tLS1CRUdJTiBDKEY"
+  # - tlsName: "aerospike-cluster"
+  #   tlsCAFile: "file:/secrets/certs/aerocacert.pem"
+  #   tlsCertFile: "file:/secrets/certs/aerocert.pem"
+  #   tlsKeyFile: "file:/secrets/certs/aerokey.pem"
+
+# Define Aerospike network TLS configuration
+aerospikeNetworkTLSConfig: {}
+  # service:
+  #   tlsOnly: true
+  #   tlsName: aerospike-client
+  #   tlsPort: 4333
+  #   mutualAuthentication: true
+  # heartbeat:
+  #   tlsOnly: true
+  #   tlsName: aerospike-cluster
+  #   tlsPort: 3012
+  # fabric:
+  #   tlsOnly: true
+  #   tlsName: aerospike-cluster
+  #   tlsPort: 3011
 
 ### -----------------------------------
 ### Deployment specific configurations
@@ -111,49 +143,91 @@ security: {}
 # Alternatively, use 'kubectl rollout restart'
 autoRolloutConfig: false
 
-# HostNetworking and Platform
-# Platform can be set to "eks", "gke", or "none"
-# With 'platform' set and 'hostNetworking' enabled, client applications from outside the network can connect to Aerospike Cluster.
-hostNetworking: false
-platform: none
+# Networking
+
+# HostNetworking
+hostNetwork:
+  enabled: false
+  useExternalIP: false
 
 # Enable NodePort Services (Type: NodePort) to expose aerospike statefulset (Use helm upgrade for scale up/down).
-enableNodePortServices: false
+nodePortServices:
+  enabled: false
+  useExternalIP: false
 
 # Enable LoadBalancer Services (Type: LoadBalancer) to expose aerospike statefulset (Use helm upgrade for scale up/down).
-enableLoadBalancerServices: false
+loadBalancerServices:
+  enabled: false
 
 # Enable external IP Services (Type: ClusterIP) to expose aerospike statefulset (Use helm upgrade for scale up/down)
-enableExternalIpServices: false
-externalIpEndpoints: {}
-  # - IP: 10.160.15.216
-  #   Port: 7000
-  # - IP: 10.160.15.216
-  #   Port: 7001
-  # - IP: 10.160.15.216
-  #   Port: 7002
-  # - IP: 10.160.15.216
-  #   Port: 7003
-  # - IP: 10.160.15.216
-  #   Port: 7004
-  # - IP: 10.160.15.217
-  #   Port: 8000
-  # - IP: 10.160.15.217
-  #   Port: 8001
-  # - IP: 10.160.15.217
-  #   Port: 8002
-  # - IP: 10.160.15.217
-  #   Port: 8003
-  # - IP: 10.160.15.217
-  #   Port: 8004
+externalIPServices:
+  enabled: false
+  externalIPEndpoints: []
+    # - IP: 10.160.15.199
+    #   Port: 7000
+    #   TLSPort: 7010
+    # - IP: 10.160.15.199
+    #   Port: 7001
+    #   TLSPort: 7011
+    # - IP: 10.160.15.199
+    #   Port: 7002
+    #   TLSPort: 7012
+    # - IP: 10.160.15.200
+    #   Port: 7003
+    #   TLSPort: 7013
+    # - IP: 10.160.15.200
+    #   Port: 7004
+    #   TLSPort: 7014
+    # - IP: 10.160.15.200
+    #   Port: 8000
+    #   TLSPort: 8010
+    # - IP: 10.160.15.217
+    #   Port: 8001
+    #   TLSPort: 8011
+    # - IP: 10.160.15.217
+    #   Port: 8002
+    #   TLSPort: 8012
+    # - IP: 10.160.15.217
+    #   Port: 8003
+    #   TLSPort: 8013
+    # - IP: 10.160.15.217
+    #   Port: 8004
+    #   TLSPort: 8014
 
-# Create and use a new ServiceAccount with a new ClusterRole for the Aerospike Statefulset deployment. If already have one, specify serviceAccountName below leaving create=false.
-# <ReleaseName>-aerospike-enterprise
-# This serviceAccountName is used for aerospike, prometheus, grafana and alertmanager statefulsets.
-# If the 'default' serviceAccount doesn't have enough permissions to read resources (or if you are not sure), set rbac.create=true.
+# Legacy network configurations (Don't worry, these are still supported)
+
+# hostNetworking: false
+# enableNodePortServices: false
+# enableLoadBalancerServices: false
+# enableExternalIpServices: false
+# externalIpEndpoints: []
+#   - IP: 10.160.15.199
+#     Port: 7000
+#   - IP: 10.160.15.199
+#     Port: 7001
+#   - IP: 10.160.15.199
+#     Port: 7002
+#   - IP: 10.160.15.200
+#     Port: 7003
+#   - IP: 10.160.15.200
+#     Port: 7004
+#   - IP: 10.160.15.200
+#     Port: 8000
+#   - IP: 10.160.15.217
+#     Port: 8001
+#   - IP: 10.160.15.217
+#     Port: 8002
+#   - IP: 10.160.15.217
+#     Port: 8003
+#   - IP: 10.160.15.217
+#     Port: 8004
+
+
+# Create and use a new ServiceAccount with a new ClusterRole for the Aerospike Statefulset deployment. If already have one, specify serviceAccountName below and set create=false.
+# This service account is also used for prometheus, grafana and alertmanager statefulsets when monitoring is enabled.
 rbac:
-  create: false
-  serviceAccountName: default
+  create: true
+  # serviceAccountName: default
 
 # Affinity / AntiAffinity configurations (For Aerospike Pods)
 # Setting 'antiAffinity' option will prevent two pods of the same release be scheduled on the same node.
@@ -185,6 +259,16 @@ tolerations: []
 
 # Node Selector (For Aerospike Pods)
 nodeSelector: {}
+
+# Extra labels for the Aerospike StatefulSet
+labels: {}
+# Extra annotations for the Aerospike StatefulSet
+annotations: {}
+
+# Extra labels for the Aerospike pods
+podLabels: {}
+# Extra annotations for the Aerospike pods
+podAnnotations: {}
 
 # Define storage devices for aerospike nodes (pods)
 persistenceStorage: {}
@@ -263,26 +347,40 @@ enableAerospikeMonitoring: false
 
 exporterImage:
   repository: aerospike/aerospike-prometheus-exporter
-  tag: 1.0.0
+  tag: latest
 
 exporter: {}
+  # agentCertFile: ""
+  # agentKeyFile: ""
   # metricLabels: "zone='asia-south1-a', platform='Google Kubernetes Engine'"
   # agentBindHost: ""
   # agentBindPort: 9145
   # agentTimeout: 10
+  # agentLogFile: ""
   # agentLogLevel: "info"
   # httpBasicAuthUsername: ""
   # httpBasicAuthPassword: ""
   # aerospikeHost: "localhost"
   # aerospikePort: 3000
-  # tickerTimeout: 5
+  # infoTimeout: 5
+  # namespaceMetricsAllowlist: ""
+  # setMetricsAllowlist: ""
+  # nodeMetricsAllowlist: ""
+  # xdrMetricsAllowlist: ""
+  # namespaceMetricsBlocklist: ""
+  # setMetricsBlocklist: ""
+  # nodeMetricsBlocklist: ""
+  # xdrMetricsBlocklist: ""
+
+  # # Autoconfigured when service TLS or security enabled on aerospike cluster (user need not configure the below options for the exporter).
+  # aerospikeCertFile: ""
+  # aerospikeKeyFile: ""
+  # aerospikeKeyFilePassphrase: ""
+  # aerospikeNodeTLSName: ""
+  # aerospikeCAFile: ""
   # aerospikeAuthMode: ""
   # aerospikeAuthUser: ""
   # aerospikeAuthPassword: ""
-  # namespaceMetricsWhitelist: ""
-  # setMetricsWhitelist: ""
-  # nodeMetricsWhitelist: ""
-  # xdrMetricsWhitelist: ""
 
 
 ### -------------------------
@@ -323,7 +421,7 @@ prometheus:
   # Prometheus docker image
   image:
     repository: prom/prometheus
-    tag: v2.11.1
+    tag: latest
 
   # Define storage for Prometheus data
   persistenceStorage:
@@ -394,7 +492,7 @@ grafana:
   # Grafana docker image
   image:
     repository: grafana/grafana
-    tag: 6.3.2
+    tag: latest
 
   # Grafana statefulset configs
   terminationGracePeriodSeconds: 120

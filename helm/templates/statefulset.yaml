@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Copyright 2012-2020 Aerospike, Inc.
+# Copyright 2012-2021 Aerospike, Inc.
 #
 # Portions may be licensed to Aerospike, Inc. under one or more contributor
 # license agreements.
@@ -24,26 +24,33 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels: &AerospikeDeploymentLabels
     app: {{ template "aerospike.name" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    chart: {{ .Chart.Name }}
     release: {{ .Release.Name }}
     unique-app: {{ .Release.Name }}-aerospike
+    {{- with .Values.labels }}{{ toYaml . | nindent 4 }}{{ end }}
+  {{- with .Values.annotations }}
+  annotations: {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   serviceName: {{ template "aerospike.fullname" . }}
   selector:
     matchLabels:
       app: {{ template "aerospike.name" . }}
-      chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+      chart: {{ .Chart.Name }}
       release: {{ .Release.Name }}
       unique-app: {{ .Release.Name }}-aerospike
   replicas: {{ .Values.dbReplicas }}
   template:
     metadata:
-      labels: *AerospikeDeploymentLabels
+      labels:
+        <<: *AerospikeDeploymentLabels
+        {{- with .Values.podLabels }}{{ toYaml . | nindent 8 }}{{ end }}
       annotations:
         {{- if .Values.autoRolloutConfig }}
         # TODO: Add an entry for secrets when used in future
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         {{- end }}
+        {{- with .Values.podAnnotations }}{{ toYaml . | nindent 8 }}{{ end }}
     spec:
       serviceAccountName: {{ if .Values.rbac.create }}{{ template "aerospike.fullname" . }}{{ else }}{{ .Values.rbac.serviceAccountName }}{{ end }}
       {{- if eq .Values.antiAffinity "hard" }}
@@ -81,11 +88,11 @@ spec:
       affinity: {{ toYaml . | nindent 8 }}
       {{- end }}
       {{- end }}
-      {{- if .Values.hostNetworking }}
+      {{- if or .Values.hostNetworking .Values.hostNetwork.enabled }}
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       {{- end }}
-      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds | default 120 }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds | default 600 }}
       {{- with .Values.tolerations }}
       tolerations: {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -100,44 +107,60 @@ spec:
         securityContext:
 {{ toYaml .Values.securityContext | indent 10 }}
         ports:
-        - containerPort: {{ .Values.aerospikeClientPort | default 3000 }}
-          name: aero-client
-        - containerPort: {{ .Values.aerospikeHeartbeatPort | default 3002 }}
-          name: aero-mesh
-        - containerPort: {{ .Values.aerospikeFabricPort | default 3001 }}
-          name: aero-fabric
+        {{- if .Values.aerospikeNetworkTLSConfig.service }}
+        - name: aero-client-tls
+          containerPort: {{ .Values.aerospikeNetworkTLSConfig.service.tlsPort | default 4333 }}
+        {{- if ne (default false .Values.aerospikeNetworkTLSConfig.service.tlsOnly) true }}
+        - name: aero-client
+          containerPort: {{ .Values.aerospikeClientPort | default 3000 }}
+        {{- end }}
+        {{- else }}
+        - name: aero-client
+          containerPort: {{ .Values.aerospikeClientPort | default 3000 }}
+        {{- end }}
+        {{- if .Values.aerospikeNetworkTLSConfig.heartbeat }}
+        - name: aero-mesh-tls
+          containerPort: {{ .Values.aerospikeNetworkTLSConfig.heartbeat.tlsPort | default 3012 }}
+        {{- if ne (default false .Values.aerospikeNetworkTLSConfig.heartbeat.tlsOnly) true }}
+        - name: aero-mesh
+          containerPort: {{ .Values.aerospikeHeartbeatPort | default 3002 }}
+        {{- end }}
+        {{- else }}
+        - name: aero-mesh
+          containerPort: {{ .Values.aerospikeHeartbeatPort | default 3002 }}
+        {{- end }}
+        {{- if .Values.aerospikeNetworkTLSConfig.fabric }}
+        - name: aero-fabric-tls
+          containerPort: {{ .Values.aerospikeNetworkTLSConfig.fabric.tlsPort | default 3011 }}
+        {{- if ne (default false .Values.aerospikeNetworkTLSConfig.fabric.tlsOnly) true }}
+        - name: aero-fabric
+          containerPort: {{ .Values.aerospikeFabricPort | default 3001 }}
+        {{- end }}
+        {{- else }}
+        - name: aero-fabric
+          containerPort: {{ .Values.aerospikeFabricPort | default 3001 }}
+        {{- end }}
         - containerPort: {{ .Values.aerospikeInfoPort | default 3003 }}
           name: aero-info
-        # Do not stop node before migrations are complete
         lifecycle:
-          {{- if .Values.security.enabled }}
           postStart:
             exec:
               command:
                 - /bin/sh
                 - -c
-                - "/etc/aerospike/aerospike.sh -h localhost -p {{ .Values.aerospikeClientPort | default 3000 }} -s 'true' -o 'post-start' -a {{ .Values.security.username }} -b {{ .Values.security.password }} -U aerospikeHelm -P aerospikeHelm"
-          {{- end }}
+                - "/etc/aerospike/aku-adm --operation post-start --log-level debug"
           preStop:
             exec:
               command:
               - /bin/sh
               - -c
-              {{- if .Values.security.enabled }}
-              - "/etc/aerospike/aerospike.sh -h localhost -p {{ .Values.aerospikeClientPort | default 3000 }} -s 'true' -o 'pre-stop' -U aerospikeHelm -P aerospikeHelm"
-              {{- else }}
-              - "/etc/aerospike/aerospike.sh -h localhost -p {{ .Values.aerospikeClientPort | default 3000 }} -s 'false' -o 'pre-stop'"
-              {{- end }}
+              - "/etc/aerospike/aku-adm --operation pre-stop --log-level debug"
         livenessProbe:
           exec:
             command:
             - /bin/sh
             - -c
-            {{- if .Values.security.enabled }}
-            - "asinfo -h localhost -p {{ .Values.aerospikeClientPort | default 3000 }} -U {{ .Values.security.username }} -P {{ .Values.security.password }} -v build"
-            {{- else }}
-            - "asinfo -h localhost -p {{ .Values.aerospikeClientPort | default 3000 }} -v build"
-            {{- end }}
+            - "/etc/aerospike/aku-adm --operation liveness --log-level debug"
           initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds | default 30 }}
           periodSeconds: {{ .Values.livenessProbe.periodSeconds | default 30 }}
           timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds | default 1 }}
@@ -145,7 +168,15 @@ spec:
           failureThreshold: {{ .Values.livenessProbe.failureThreshold | default 3 }}
         readinessProbe:
           tcpSocket:
+              {{- if .Values.aerospikeNetworkTLSConfig.service }}
+              {{- if ne (default false .Values.aerospikeNetworkTLSConfig.service.tlsOnly) true }}
               port: {{ .Values.aerospikeClientPort | default 3000 }}
+              {{- else }}
+              port: {{ .Values.aerospikeNetworkTLSConfig.service.tlsPort | default 4333 }}
+              {{- end }}
+              {{- else }}
+              port: {{ .Values.aerospikeClientPort | default 3000 }}
+              {{- end }}
           initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds | default 30 }}
           periodSeconds: {{ .Values.readinessProbe.periodSeconds | default 10 }}
           timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds | default 1 }}
@@ -196,6 +227,43 @@ spec:
           value: {{ .Values.aerospikeFabricPort | default 3001 | quote }}
         - name: INFO_PORT
           value: {{ .Values.aerospikeInfoPort | default 3003 | quote }}
+        # Aerospike utility variables
+        {{- if .Values.security.enabled }}
+        - name: SECURITY_ENABLED
+          value: {{ .Values.security.enabled | default false | quote }}
+        - name: HELM_USERNAME
+          value: {{ .Values.security.helmUsername | default "helm_operator" | quote }}
+        - name: HELM_PASSWORD
+          value: {{ .Values.security.helmPassword | default "helm_operator" | quote }}
+        - name: ADMIN_USERNAME
+          value: {{ .Values.security.username | default "admin" | quote }}
+        - name: ADMIN_PASSWORD
+          value: {{ .Values.security.username | default "admin" | quote }}
+        - name: AUTH_MODE
+          value: {{ .Values.security.authMode | default "internal" | quote }}
+        {{- end }}
+        {{- range $tc := .Values.tlsConfig }}
+        {{- if $.Values.aerospikeNetworkTLSConfig.service }}
+        {{- if eq $.Values.aerospikeNetworkTLSConfig.service.tlsName $tc.tlsName }}
+        - name: SERVICE_TLS_ENABLED
+          value: {{ $.Values.aerospikeNetworkTLSConfig.service.tlsOnly | default false | quote }}
+        - name: SERVICE_TLS_NAME
+          value: {{ $tc.tlsName | default "" | quote }}
+        - name: SERVICE_MUTUAL_AUTH
+          value: {{ $.Values.aerospikeNetworkTLSConfig.service.mutualAuthentication | default false | quote }}
+        - name: SERVICE_TLS_PORT
+          value: {{ $.Values.aerospikeNetworkTLSConfig.service.tlsPort | default 4333 | quote }}
+        - name: SERVICE_PLAIN_PORT
+          value: {{ .Values.aerospikeClientPort | default 3000 | quote }}
+        - name: SERVICE_CA_FILE
+          value: {{ $tc.tlsCAFile | default "" | quote }}
+        - name: SERVICE_CERT_FILE
+          value: {{ $tc.tlsCertFile | default "" | quote }}
+        - name: SERVICE_KEY_FILE
+          value: {{ $tc.tlsKeyFile | default "" | quote }}
+        {{- end }}
+        {{- end }}
+        {{- end }}
         # Downward API:
         - name: MY_POD_NAME
           valueFrom:
@@ -219,7 +287,12 @@ spec:
         volumeMounts:
         - name: apeconfdir
           mountPath: /etc/aerospike-prometheus-exporter
+        {{- range $lv := .Values.volumes }}
+        - name: {{ $lv.name | quote }}
+          mountPath: {{ $lv.mountPath | quote }}
+        {{- end }}
         env:
+        # Downward API
         - name: MY_POD_NAME
           valueFrom:
             fieldRef:
@@ -232,40 +305,65 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: status.podIP
-        - name: AS_HOST
-          value: {{ .Values.exporter.aerospikeHost | default "localhost" | quote }}
-        - name: AS_PORT
-          value: {{ .Values.exporter.aerospikePort | default 3000 | quote }}
+        # Exporter configs
+        - name: AGENT_CERT_FILE
+          value: {{ .Values.exporter.agentCertFile | default "" | quote }}
+        - name: AGENT_KEY_FILE
+          value: {{ .Values.exporter.agentKeyFile | default "" | quote }}
+        - name: METRIC_LABELS
+          value: {{ .Values.exporter.metricLabels | default "" | quote }}
         - name: AGENT_BIND_HOST
           value: {{ .Values.exporter.agentBindHost | default "" | quote }}
         - name: AGENT_BIND_PORT
           value: {{ .Values.exporter.agentBindPort | default 9145 | quote }}
-        - name: AGENT_LOG_LEVEL
-          value: {{ .Values.exporter.agentLogLevel | default "info" | quote }}
         - name: AGENT_TIMEOUT
           value: {{ .Values.exporter.agentTimeout | default 10 | quote }}
-        - name: METRIC_LABELS
-          value: {{ .Values.exporter.metricLabels | default "" | quote }}
-        - name: TICKER_TIMEOUT
-          value: {{ .Values.exporter.tickerTimeout | default 5 | quote }}
+        - name: AGENT_LOG_FILE
+          value: {{ .Values.exporter.agentLogFile | default "" | quote }}
+        - name: AGENT_LOG_LEVEL
+          value: {{ .Values.exporter.agentLogLevel | default "info" | quote }}
+        - name: BASIC_AUTH_USERNAME
+          value: {{ .Values.exporter.httpBasicAuthUsername | default "" | quote }}
+        - name: BASIC_AUTH_PASSWORD
+          value: {{ .Values.exporter.httpBasicAuthPassword | default "" | quote }}
+        - name: AS_HOST
+          value: {{ .Values.exporter.aerospikeHost | default "localhost" | quote }}
+        - name: AS_PORT
+          value: {{ .Values.exporter.aerospikePort | default 3000 | quote }}
+        - name: AS_CERT_FILE
+          value: {{ .Values.exporter.aerospikeCertFile | default "" | quote }}
+        - name: AS_KEY_FILE
+          value: {{ .Values.exporter.aerospikeKeyFile | default "" | quote }}
+        - name: AS_KEY_FILE_PASSPHRASE
+          value: {{ .Values.exporter.aerospikeKeyFilePassphrase | default "" | quote }}
+        - name: AS_NODE_TLS_NAME
+          value: {{ .Values.exporter.aerospikeNodeTLSName | default "" | quote }}
+        - name: AS_ROOT_CA
+          value: {{ .Values.exporter.aerospikeCAFile | default "" | quote }}
         - name: AS_AUTH_MODE
           value: {{ .Values.exporter.aerospikeAuthMode | default "" | quote }}
         - name: AS_AUTH_USER
           value: {{ .Values.exporter.aerospikeAuthUser | default "" | quote }}
         - name: AS_AUTH_PASSWORD
           value: {{ .Values.exporter.aerospikeAuthPassword | default "" | quote }}
-        - name: NAMESPACE_METRICS_WHITELIST
-          value: {{ .Values.exporter.namespaceMetricsWhitelist | default "" | quote }}
-        - name: SET_METRICS_WHITELIST
-          value: {{ .Values.exporter.setMetricsWhitelist | default "" | quote }}
-        - name: NODE_METRICS_WHITELIST
-          value: {{ .Values.exporter.nodeMetricsWhitelist | default "" | quote }}
-        - name: XDR_METRICS_WHITELIST
-          value: {{ .Values.exporter.xdrMetricsWhitelist | default "" | quote }}
-        - name: BASIC_AUTH_USERNAME
-          value: {{ .Values.exporter.httpBasicAuthUsername | default "" | quote }}
-        - name: BASIC_AUTH_PASSWORD
-          value: {{ .Values.exporter.httpBasicAuthPassword | default "" | quote }}
+        - name: TICKER_TIMEOUT
+          value: {{ .Values.exporter.infoTimeout | default 5 | quote }}
+        - name: NAMESPACE_METRICS_ALLOWLIST
+          value: {{ .Values.exporter.namespaceMetricsAllowlist | default "" | quote }}
+        - name: SET_METRICS_ALLOWLIST
+          value: {{ .Values.exporter.setMetricsAllowlist | default "" | quote }}
+        - name: NODE_METRICS_ALLOWLIST
+          value: {{ .Values.exporter.nodeMetricsAllowlist | default "" | quote }}
+        - name: XDR_METRICS_ALLOWLIST
+          value: {{ .Values.exporter.xdrMetricsAllowlist | default "" | quote }}
+        - name: NAMESPACE_METRICS_BLOCKLIST
+          value: {{ .Values.exporter.namespaceMetricsBlocklist | default "" | quote }}
+        - name: SET_METRICS_BLOCKLIST
+          value: {{ .Values.exporter.setMetricsBlocklist | default "" | quote }}
+        - name: NODE_METRICS_BLOCKLIST
+          value: {{ .Values.exporter.nodeMetricsBlocklist | default "" | quote }}
+        - name: XDR_METRICS_BLOCKLIST
+          value: {{ .Values.exporter.xdrMetricsBlocklist | default "" | quote }}
       {{- end }}
       initContainers:
       - name: aerospike-init
@@ -298,20 +396,110 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: status.hostIP
-        - name: HB_PORT
+        - name: HEARTBEAT_PORT
           value: {{ .Values.aerospikeHeartbeatPort | default 3002 | quote }}
+        - name: FABRIC_PORT
+          value: {{ .Values.aerospikeFabricPort | default 3001 | quote }}
+        - name: SERVICE_PORT
+          value: {{ .Values.aerospikeClientPort | default 3000 | quote }}
         - name: AUTO_GENERATE_NODE_IDS
           value: {{ .Values.autoGenerateNodeIds | default false | quote }}
-        - name: PLATFORM
-          value: {{ .Values.platform | quote }}
-        - name: HOST_NETWORK
-          value: {{ .Values.hostNetworking | default false | quote }}
+        - name: NODE_ID_PREFIX
+          value: {{ .Values.nodeIDPrefix | default "a" | quote }}
+        {{- if .Values.security.enabled }}
+        - name: SECURITY_ENABLED
+          value: {{ .Values.security.enabled | default false | quote }}
+        - name: HELM_USERNAME
+          value: {{ .Values.security.helmUsername | default "helm_operator" | quote }}
+        - name: HELM_PASSWORD
+          value: {{ .Values.security.helmPassword | default "helm_operator" | quote }}
+        - name: ADMIN_USERNAME
+          value: {{ .Values.security.username | default "admin" | quote }}
+        - name: ADMIN_PASSWORD
+          value: {{ .Values.security.username | default "admin" | quote }}
+        - name: AUTH_MODE
+          value: {{ .Values.security.authMode | default "internal" | quote }}
+        {{- end }}
+        {{- if or .Values.hostNetworking .Values.hostNetwork.enabled }}
+        - name: HOST_NETWORKING
+          value: "true"
+        {{- end }}
+        {{- if and .Values.hostNetwork.enabled .Values.hostNetwork.useExternalIP }}
+        - name: HOST_NETWORKING_EXTERNAL_IP
+          value: "true"
+        {{- end }}
+        {{- if or .Values.enableNodePortServices .Values.nodePortServices.enabled }}
         - name: ENABLE_NODE_PORT_SERVICES
-          value: {{ .Values.enableNodePortServices | default false | quote }}
+          value: "true"
+        {{- end }}
+        {{- if and .Values.nodePortServices.enabled .Values.nodePortServices.useExternalIP }}
+        - name: ENABLE_NODE_PORT_SERVICES_EXTERNAL_IP
+          value: "true"
+        {{- end }}
+        {{- if or .Values.enableLoadBalancerServices .Values.loadBalancerServices.enabled }}
         - name: ENABLE_LOADBALANCER_SERVICES
-          value: {{ .Values.enableLoadBalancerServices | default false | quote }}
-        - name: ENABLE_EXT_IP_SERVICES
-          value: {{ .Values.enableExternalIpServices | default false | quote }}
+          value: "true"
+        {{- end }}
+        {{- if or .Values.enableExternalIpServices .Values.externalIPServices.enabled }}
+        - name: ENABLE_EXTERNAL_IP_SERVICES
+          value: "true"
+        {{- end }}
+        {{- range $tc := .Values.tlsConfig }}
+        {{- if $.Values.aerospikeNetworkTLSConfig.service }}
+        {{- if eq $.Values.aerospikeNetworkTLSConfig.service.tlsName $tc.tlsName }}
+        - name: SERVICE_TLS_ONLY
+          value: {{ $.Values.aerospikeNetworkTLSConfig.service.tlsOnly | default false | quote }}
+        - name: SERVICE_CA_FILE
+          value: {{ $tc.tlsCAFile | default "" | quote }}
+        - name: SERVICE_CERT_FILE
+          value: {{ $tc.tlsCertFile | default "" | quote }}
+        - name: SERVICE_KEY_FILE
+          value: {{ $tc.tlsKeyFile | default "" | quote }}
+        - name: SERVICE_TLS_NAME
+          value: {{ $tc.tlsName | default "" | quote }}
+        - name: SERVICE_MUTUAL_AUTH
+          value: {{ $.Values.aerospikeNetworkTLSConfig.service.mutualAuthentication | default false | quote }}
+        - name: SERVICE_TLS_PORT
+          value: {{ $.Values.aerospikeNetworkTLSConfig.service.tlsPort | default 4333 | quote }}
+        {{- end }}
+        {{- end }}
+        {{- if $.Values.aerospikeNetworkTLSConfig.heartbeat }}
+        {{- if eq $.Values.aerospikeNetworkTLSConfig.heartbeat.tlsName $tc.tlsName }}
+        - name: HEARTBEAT_TLS_ONLY
+          value: {{ $.Values.aerospikeNetworkTLSConfig.heartbeat.tlsOnly | default false | quote }}
+        - name: HEARTBEAT_CA_FILE
+          value: {{ $tc.tlsCAFile | default "" | quote }}
+        - name: HEARTBEAT_CERT_FILE
+          value: {{ $tc.tlsCertFile | default "" | quote }}
+        - name: HEARTBEAT_KEY_FILE
+          value: {{ $tc.tlsKeyFile | default "" | quote }}
+        - name: HEARTBEAT_TLS_NAME
+          value: {{ $tc.tlsName | default "" | quote }}
+        - name: HEARTBEAT_TLS_PORT
+          value: {{ $.Values.aerospikeNetworkTLSConfig.heartbeat.tlsPort | default 3012 | quote }}
+        {{- end }}
+        {{- end }}
+        {{- if $.Values.aerospikeNetworkTLSConfig.fabric }}
+        {{- if eq $.Values.aerospikeNetworkTLSConfig.fabric.tlsName $tc.tlsName }}
+        - name: FABRIC_TLS_ONLY
+          value: {{ $.Values.aerospikeNetworkTLSConfig.fabric.tlsOnly | default false | quote }}
+        - name: FABRIC_CA_FILE
+          value: {{ $tc.tlsCAFile | default "" | quote }}
+        - name: FABRIC_CERT_FILE
+          value: {{ $tc.tlsCertFile | default "" | quote }}
+        - name: FABRIC_KEY_FILE
+          value: {{ $tc.tlsKeyFile | default "" | quote }}
+        - name: FABRIC_TLS_NAME
+          value: {{ $tc.tlsName | default "" | quote }}
+        - name: FABRIC_TLS_PORT
+          value: {{ $.Values.aerospikeNetworkTLSConfig.fabric.tlsPort | default 3011 | quote }}
+        {{- end }}
+        {{- end }}
+        {{- end }}
+        {{- if or (eq .Values.enableAerospikeMonitoring true) (eq .Values.enableAerospikePrometheusExporter true) }}
+        - name: AEROSPIKE_PROMETHEUS_EXPORTER_ENABLED
+          value: "true"
+        {{- end }}
       volumes:
       {{- if or (eq .Values.enableAerospikeMonitoring true) (eq .Values.enableAerospikePrometheusExporter true) }}
       - name: apeconfdir
@@ -332,6 +520,9 @@ spec:
     - metadata:
         name: {{ $pv.name }}
         labels: *AerospikeDeploymentLabels
+        {{- with $.Values.annotations }}
+        annotations: {{- toYaml . | nindent 10 }}
+        {{- end }}
       spec:
         volumeMode: {{ $pv.volumeMode }}
         accessModes:
