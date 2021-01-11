@@ -15,8 +15,16 @@
 # the License.
 # ------------------------------------------------------------------------------
 
+{{- if and .Values.enableExternalIpServices .Values.externalIPServices.enabled }}
+{{ fail "Both legacy(enableExternalIpServices) and new(externalIPServices) are enabled! Use only one!" }}
+{{- end }}
+
 {{- if .Values.enableExternalIpServices }}
-{{ $length := len .Values.externalIpEndpoints }} {{ if lt $length (int .Values.dbReplicas) }}
+{{ $length := 0 }}
+{{- if .Values.externalIpEndpoints }}
+{{ $length = len .Values.externalIpEndpoints }}
+{{- end }}
+{{ if lt $length (int .Values.dbReplicas) }}
 {{ fail "Number of externalIpEndpoints should be equal to or more than dbReplicas" }}
 {{ end }}
 {{- $dot := . }}
@@ -35,10 +43,69 @@ spec:
   externalIPs:
     - {{ $ip := index $.Values.externalIpEndpoints $podIndex }} {{ $ip.IP }}
   ports:
-    - port: {{ $ip := index $.Values.externalIpEndpoints $podIndex }} {{ $ip.Port }}
-      targetPort: {{ $.Values.aerospikeClientPort | default 3000 }}
-      protocol: TCP
-      name: client
+  {{- if $.Values.aerospikeNetworkTLSConfig.service }}
+  - port: {{ $ip := index $.Values.externalIpEndpoints $podIndex }} {{ $ip.TLSPort }}
+    targetPort: {{ $.Values.aerospikeNetworkTLSConfig.service.tlsPort | default 4333 }}
+    protocol: TCP
+    name: aerospike-tls
+  {{- if ne (default false $.Values.aerospikeNetworkTLSConfig.service.tlsOnly) true }}
+  - port: {{ $ip := index $.Values.externalIpEndpoints $podIndex }} {{ $ip.Port }}
+    targetPort: {{ $.Values.aerospikeClientPort | default 3000 }}
+    protocol: TCP
+    name: aerospike-plain
+  {{- end }}
+  {{- else }}
+  - port: {{ $ip := index $.Values.externalIpEndpoints $podIndex }} {{ $ip.Port }}
+    targetPort: {{ $.Values.aerospikeClientPort | default 3000 }}
+    protocol: TCP
+    name: aerospike-plain
+  {{- end }}
+  selector:
+    statefulset.kubernetes.io/pod-name: "{{ $.Release.Name }}-{{ $.Chart.Name }}-{{ $podIndex }}"
+{{ end -}}
+{{- end }}
+
+{{- if .Values.externalIPServices.enabled }}
+{{ $length := 0 }}
+{{- if .Values.externalIPServices.externalIPEndpoints }}
+{{ $length = len .Values.externalIPServices.externalIPEndpoints }}
+{{- end }}
+{{ if lt $length (int .Values.dbReplicas) }}
+{{ fail "Number of externalIPServices.externalIPEndpoints should be equal to or more than dbReplicas" }}
+{{ end }}
+{{- $dot := . }}
+{{ range $podIndex := until (int .Values.dbReplicas) -}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "extip-{{ $.Release.Name }}-{{ $.Chart.Name }}-{{ $podIndex }}"
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app: {{ template "aerospike.name" $dot }}
+    chart: {{ $.Chart.Name }}-{{ $.Chart.Version }}
+    release: {{ $.Release.Name }}
+spec:
+  externalIPs:
+    - {{ $ip := index $.Values.externalIPServices.externalIPEndpoints $podIndex }} {{ $ip.IP }}
+  ports:
+  {{- if $.Values.aerospikeNetworkTLSConfig.service }}
+  - port: {{ $ip := index $.Values.externalIPServices.externalIPEndpoints $podIndex }} {{ $ip.TLSPort }}
+    targetPort: {{ $.Values.aerospikeNetworkTLSConfig.service.tlsPort | default 4333 }}
+    protocol: TCP
+    name: aerospike-tls
+  {{- if ne (default false $.Values.aerospikeNetworkTLSConfig.service.tlsOnly) true }}
+  - port: {{ $ip := index $.Values.externalIPServices.externalIPEndpoints $podIndex }} {{ $ip.Port }}
+    targetPort: {{ $.Values.aerospikeClientPort | default 3000 }}
+    protocol: TCP
+    name: aerospike-plain
+  {{- end }}
+  {{- else }}
+  - port: {{ $ip := index $.Values.externalIPServices.externalIPEndpoints $podIndex }} {{ $ip.Port }}
+    targetPort: {{ $.Values.aerospikeClientPort | default 3000 }}
+    protocol: TCP
+    name: aerospike-plain
+  {{- end }}
   selector:
     statefulset.kubernetes.io/pod-name: "{{ $.Release.Name }}-{{ $.Chart.Name }}-{{ $podIndex }}"
 {{ end -}}

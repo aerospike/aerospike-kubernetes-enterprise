@@ -15,7 +15,7 @@
 # the License.
 # ------------------------------------------------------------------------------
 
-{{- if .Values.enableNodePortServices }}
+{{- if or .Values.enableNodePortServices .Values.nodePortServices.enabled }}
 {{- $dot := . }}
 {{ range $podIndex := until (int .Values.dbReplicas) -}}
 ---
@@ -32,7 +32,17 @@ spec:
   type: NodePort
   externalTrafficPolicy: Local
   ports:
-  - port: {{ $.Values.aerospikeClientPort | default 3000 }}
+  {{- if $.Values.aerospikeNetworkTLSConfig.service }}
+  - name: aerospike-tls
+    port: {{ $.Values.aerospikeNetworkTLSConfig.service.tlsPort | default 4333 }}
+  {{- if ne (default false $.Values.aerospikeNetworkTLSConfig.service.tlsOnly) true }}
+  - name: aerospike-plain
+    port: {{ $.Values.aerospikeClientPort | default 3000 }}
+  {{- end }}
+  {{- else }}
+  - name: aerospike-plain
+    port: {{ $.Values.aerospikeClientPort | default 3000 }}
+  {{- end }}
   selector:
     statefulset.kubernetes.io/pod-name: "{{ $.Release.Name }}-{{ $.Chart.Name }}-{{ $podIndex }}"
 {{ end -}}
