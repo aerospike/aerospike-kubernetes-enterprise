@@ -254,7 +254,7 @@ spec:
         - name: SERVICE_TLS_PORT
           value: {{ $.Values.aerospikeNetworkTLSConfig.service.tlsPort | default 4333 | quote }}
         - name: SERVICE_PLAIN_PORT
-          value: {{ .Values.aerospikeClientPort | default 3000 | quote }}
+          value: {{ $.Values.aerospikeClientPort | default 3000 | quote }}
         - name: SERVICE_CA_FILE
           value: {{ $tc.tlsCAFile | default "" | quote }}
         - name: SERVICE_CERT_FILE
