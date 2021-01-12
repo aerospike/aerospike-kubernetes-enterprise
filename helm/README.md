@@ -366,7 +366,7 @@ Aerospike helm chart automatically creates a new `sys-admin` user with credentia
 
 Use `tlsConfig` configuration to define TLS certificates. Multiple certificates can be defined. Each entry in `tlsConfig` must contain a `tlsName` (Subject/CN field or X509v3 Subject Alternative Name), `tlsCAFile` (CA certificate), `tlsCertFile` (server certificate) and a `tlsKeyFile` (key file contains private key associated with the certificate).
 
-For options `tlsCAFile`, `tlsCertFile` and `tlsKeyFile`, provide base64 encoded version of certificates using format `"b64enc:<Base64EncodedStringOfCertificateFile>"` or provide file path to certificates which is accessible inside the container using format `"file:<FilePathToCertficateFile>"`.
+For `tlsCAFile`, `tlsCertFile` and `tlsKeyFile`, provide either base64 encoded version of certificates using format `"b64enc:<Base64EncodedStringOfCertificateFile>"` or provide file path to certificates which is accessible inside the container using format `"file:<FilePathToCertficateFile>"`.
 
 ```yaml
 tlsConfig:
@@ -380,7 +380,7 @@ tlsConfig:
     tlsKeyFile: "file:/secrets/certs/aerokey.pem"
 ```
 
-If the certificates are available as a kubernetes secret, the secret can be mounted as a volume using `volumes` configuration and the file path for each certificate can be specified using `file:<path>` format.
+If the certificates are available as a kubernetes secret, the secret can be mounted as a volume using `volumes` configuration and the file path to each certificate can be specified using `file:<FilePathToCertficateFile>` format.
 
 ```yaml
 volumes:
@@ -391,16 +391,16 @@ volumes:
       secretName: aerospike-certs
 ```
 
-Now, use `aerospikeNetworkTLSConfig` to define Aerospike network TLS configuration. `aerospikeNetworkTLSConfig` can contain three sections - `service`(client-to-cluster), `heartbeat`(node-to-node) and `fabric`(node-to-node).
+Use `aerospikeNetworkTLSConfig` to specify Aerospike network TLS configuration. `aerospikeNetworkTLSConfig` contains three configuration keys - `service`(client-to-cluster TLS), `heartbeat`(node-to-node TLS) and `fabric`(node-to-node TLS).
 
-Each section contains the following configurations,
-- `tlsOnly` - enables only TLS traffic and disables non-TLS traffic
-- `tlsName` - TLS Name of one of the certifates defined in `tlsConfig`
+Each key further contains the following configurations,
+- `tlsOnly` - enables only TLS traffic (disables non-TLS traffic)
+- `tlsName` - TLS Name of one of the certificates defined in `tlsConfig`
 - `tlsPort` - TLS port number
 
 To enable mutual authentication in client-to-cluster communication, set `aerospikeNetworkTLSConfig.service.mutualAuthentication` to `true`.
 
-For example,
+Here's an example configuration that enables TLS for all three traffic - `service`, `heartbeat` and `fabric`.
 
 ```yaml
 aerospikeNetworkTLSConfig:
