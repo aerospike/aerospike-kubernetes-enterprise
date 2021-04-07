@@ -105,6 +105,10 @@ security: {}
   # helmPassword: "helm_operator"
   # authMode: "internal"
 
+### -----------------------------
+### Aerospike TLS Configuration
+### -----------------------------
+
 # Define TLS certificates
 # 1. Provide base64 encoded version of certificates using format "b64enc:<Base64EncodedStringOfCertificateFile>"
 # OR,
@@ -139,6 +143,9 @@ aerospikeNetworkTLSConfig: {}
 ### Deployment specific configurations
 ### -----------------------------------
 
+# Arguments that are passed to the Aerospike container
+# args: []
+
 # Rollout ConfigMap/Secrets changes on 'helm upgrade'
 # Alternatively, use 'kubectl rollout restart'
 autoRolloutConfig: false
@@ -154,10 +161,19 @@ hostNetwork:
 nodePortServices:
   enabled: false
   useExternalIP: false
+  # Extra labels for the node port services (optional)
+  labels: {}
+  # Extra annotations for the node port services (optional)
+  annotations: {}
 
 # Enable LoadBalancer Services (Type: LoadBalancer) to expose aerospike statefulset (Use helm upgrade for scale up/down).
 loadBalancerServices:
   enabled: false
+  # Extra labels for the load balancer services (optional)
+  labels: {}
+  # Extra annotations for load balancer services (optional)
+  annotations: {}
+    # cloud.google.com/load-balancer-type: "Internal"
 
 # Enable external IP Services (Type: ClusterIP) to expose aerospike statefulset (Use helm upgrade for scale up/down)
 externalIPServices:
@@ -193,6 +209,10 @@ externalIPServices:
     # - IP: 10.160.15.217
     #   Port: 8004
     #   TLSPort: 8014
+  # Extra labels for the external IP services (optional)
+  labels: {}
+  # Extra annotations for the external IP services (optional)
+  annotations: {}
 
 # Legacy network configurations (Don't worry, these are still supported)
 
@@ -313,20 +333,42 @@ podSecurityContext: {}
 # Aerospike container security context
 securityContext: {}
 
+# Aerospike configuration file as base64 encoded string
+# aerospikeConfFileBase64: <base64-encoded-aerospike-conf-file>
+
+# Aerospike feature key file as base64 encoded string
+# featureKeyFileBase64: <base64-encoded-feature-key-file>
+
 ### -----------------------------------------------------------
 ### Dynamic configuration - Used during 'helm install...' etc.
 ### -----------------------------------------------------------
 
 # Aerospike Configuration file path on helm "client" machine (from where the user is running 'helm install')
+# (new config)
+# aerospikeConfFile:
+
+# (old config)
 # confFilePath:
 
 # Aerospike feature key file path on helm "client" machine (from where the user is running 'helm install')
+# (new config)
+# featureKeyFile:
+
+# (old config)
 # featureKeyFilePath:
 
 # (Only when enableAerospikeMonitoring = true) Aerospike alert rules configuration file path on helm "client" machine (from where the user is running 'helm install')
+# (new config)
+# prometheus.aerospikeAlertRulesFile:
+
+# (old config)
 # prometheus.aerospikeAlertRulesFilePath:
 
 # (Only when enableAerospikeMonitoring = true) Alertmanager configuration file path on helm "client" machine (from where the user is running 'helm install')
+# (new config)
+# alertmanager.alertmanagerConfFile:
+
+# (old config)
 # alertmanager.alertmanagerConfFilePath:
 
 
@@ -457,6 +499,16 @@ prometheus:
   # Node Selector (For Prometheus Pods)
   nodeSelector: {}
 
+  # Extra labels for the Prometheus StatefulSet
+  labels: {}
+  # Extra annotations for the Prometheus StatefulSet
+  annotations: {}
+
+  # Extra labels for the Prometheus pods
+  podLabels: {}
+  # Extra annotations for the Prometheus pods
+  podAnnotations: {}
+
   # Affinity / AntiAffinity configurations (For Prometheus Pods)
   # Setting 'antiAffinity' option will prevent two pods of the same release be scheduled on the same node.
   # 'antiAffinity' levels can be "off" (not set), "soft" (preferredDuringSchedulingIgnoredDuringExecution) and "hard" (requiredDuringSchedulingIgnoredDuringExecution)
@@ -475,7 +527,13 @@ prometheus:
     #         - gke-gke-blr-default-pool-06a23412-0dkt
 
   # Aerospike alert rules configuration file path on helm "client" machine (from where the user is running 'helm install')
+  # (new config)
+  # aerospikeAlertRulesFile:
+  # (old config)
   # aerospikeAlertRulesFilePath:
+
+  # Alert rules file as base64 encoded string
+  # aerospikeAlertRulesFileBase64:
 
 
 ### ----------------------
@@ -551,6 +609,16 @@ grafana:
 
   # Node Selector (For Grafana Pods)
   nodeSelector: {}
+
+  # Extra labels for the Grafana StatefulSet
+  labels: {}
+  # Extra annotations for the Grafana StatefulSet
+  annotations: {}
+
+  # Extra labels for the Grafana pods
+  podLabels: {}
+  # Extra annotations for the Grafana pods
+  podAnnotations: {}
 
   # Affinity / AntiAffinity configurations (For Grafana Pods)
   # Setting 'antiAffinity' option will prevent two pods of the same release be scheduled on the same node.
@@ -644,6 +712,16 @@ alertmanager:
   # Node Selector (For Alertmanager Pods)
   nodeSelector: {}
 
+  # Extra labels for the Alertmanager StatefulSet
+  labels: {}
+  # Extra annotations for the Alertmanager StatefulSet
+  annotations: {}
+
+  # Extra labels for the Alertmanager pods
+  podLabels: {}
+  # Extra annotations for the Alertmanager pods
+  podAnnotations: {}
+
   # Affinity / AntiAffinity configurations (For Alertmanager Pods)
   # Setting 'antiAffinity' option will prevent two pods of the same release be scheduled on the same node.
   # 'antiAffinity' levels can be "off" (not set), "soft" (preferredDuringSchedulingIgnoredDuringExecution) and "hard" (requiredDuringSchedulingIgnoredDuringExecution)
@@ -662,4 +740,10 @@ alertmanager:
     #         - gke-gke-blr-default-pool-06a23412-0dkt
 
   # Alertmanager configuration file path on helm "client" machine (from where the user is running 'helm install')
+  # (new config)
+  # alertmanagerConfFile:
+  # (old config)
   # alertmanagerConfFilePath:
+
+  # Alertmanager configuration file as base64 encoded string
+  # alertmanagerConfFileBase64:
