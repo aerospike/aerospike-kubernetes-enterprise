@@ -18,7 +18,7 @@ helm repo add aerospike https://aerospike.github.io/aerospike-kubernetes-enterpr
 ### Install the chart
 
 ```sh
-helm install aerospike-release aerospike/aerospike-enterprise --set-file featureKeyFilePath=/secrets/aerospike/features.conf
+helm install aerospike-release aerospike/aerospike-enterprise --set-file featureKeyFile=/secrets/aerospike/features.conf
 ```
 
 All the configurations defined in [`values.yaml`](values.yaml) (or in the [configuration section](#configuration)) can be set using `--set` or `--set-file` option. A custom `values.yaml` file can also be provided using `-f` option.
@@ -28,7 +28,7 @@ For example,
 ```sh
 helm install aerospike-release aerospike/aerospike-enterprise \
 			 --set dbReplicas=5 \
-			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf
+			 --set-file featureKeyFile=/secrets/aerospike/features.conf
 ```
 
 For Helm v2,
@@ -36,71 +36,48 @@ For Helm v2,
 ```sh
 helm install --name aerospike-release aerospike/aerospike-enterprise \
 			 --set dbReplicas=5 \
-			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf
-```
-
-### Test output:
-
-```sh
-NAME:   aerospike-release
-LAST DEPLOYED: Fri Mar  6 15:50:33 2020
-NAMESPACE: default
-STATUS: DEPLOYED
-
-RESOURCES:
-==> v1/ConfigMap
-NAME                                            DATA   AGE
-aerospike-release-conf                          2      51m
-
-==> v1/Pod(related)
-NAME                                           READY   STATUS    RESTARTS   AGE
-pod/aerospike-release-aerospike-enterprise-0   1/1     Running   0          49m
-pod/aerospike-release-aerospike-enterprise-1   1/1     Running   0          49m
-pod/aerospike-release-aerospike-enterprise-2   1/1     Running   0          48m
-
-==> v1/Service
-NAME                                             TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)    AGE
-service/aerospike-release-aerospike-enterprise   ClusterIP   None         <none>        3000/TCP   49m
-
-==> v1/StatefulSet
-NAME                                                      READY   AGE
-statefulset.apps/aerospike-release-aerospike-enterprise   3/3     49m
-```
-
-```sh
-$ helm list
-NAME             	REVISION	UPDATED                 	STATUS  	CHART                     	APP VERSION	NAMESPACE
-aerospike-release	1       	Fri Mar  6 15:50:33 2020	DEPLOYED	aerospike-enterprise-5.0.0	5.0.0.4   	default
+			 --set-file featureKeyFile=/secrets/aerospike/features.conf
 ```
 
 ### Apply custom Aerospike configuration
 
-- To override the default `aerospike.template.conf`, set `confFilePath` to point to the custom `aerospike.conf` file or template.
+- To override the default `aerospike.template.conf`, set `aerospikeConfFile` to point to the custom `aerospike.conf` file or template.
 
-	> `confFilePath` should be a file path on helm "client" machine (where the user is running the command `helm install`).
+	> `aerospikeConfFile` should be a file path on helm "client" machine (where the user is running the command `helm install`).
 
-- `confFilePath` can be set using `--set-file` option,
+- `aerospikeConfFile` can be set using `--set-file` option,
 	```sh
 	helm install aerospike-release aerospike/aerospike-enterprise \
-				 --set-file confFilePath=/tmp/aerospike_templates/aerospike.template.conf \
-				 --set-file featureKeyFilePath=/secrets/aerospike/features.conf
+				 --set-file aerospikeConfFile=/tmp/aerospike_templates/aerospike.template.conf \
+				 --set-file featureKeyFile=/secrets/aerospike/features.conf
+	```
+
+- Aerospike configuration file can also be passed in base64 encoded form. Use `aerospikeConfFileBase64` configuration to specify base64 encoded string of the Aerospike configuration file.
+	```sh
+	helm install aerospike-release aerospike/aerospike-enterprise \
+				 --set aerospikeConfFileBase64=$(base64 /tmp/aerospike_templates/aerospike.template.conf) \
+				 --set-file featureKeyFile=/secrets/aerospike/features.conf
 	```
 
 ### Apply Aerospike enterprise licence
 
-- To add a `feature-key-file` at the time of the deployment, set `featureKeyFilePath` to point to a `features.conf` licence file.
+- To add a `feature-key-file` at the time of the deployment, set `featureKeyFile` to point to a `features.conf` licence file.
 
-	> `featureKeyFilePath` should be a file path on helm "client" machine (where the user is running the command `helm install`).
+	> `featureKeyFile` should be a file path on helm "client" machine (where the user is running the command `helm install`).
 
 	Example,
 	```sh
 	helm install aerospike-release aerospike/aerospike-enterprise \
-				 --set-file featureKeyFilePath=/secrets/aerospike/features.conf
+				 --set-file featureKeyFile=/secrets/aerospike/features.conf
 	```
 
 - If a mounted volume is used to provide the `feature-key-file`, set `aerospikeFeatureKeyFilePath` to the file path accessible within the container.
-- A license file (`features.conf`) can also be added to `files/` directory of this repo (if git cloned) which will then automatically be loaded into the ConfigMap on `helm install`.
 
+- Aerospike license feature key file can also be passed in base64 encoded form. Use `featureKeyFileBase64` configuration to specify base64 encoded string of the Aerospike feature key file.
+	```sh
+	helm install aerospike-release aerospike/aerospike-enterprise \
+				 --set featureKeyFileBase64=$(base64 /secrets/aerospike/features.conf)
+	```
 ### Storage configuration
 
 Aerospike helm chart allows multiple volume mounts (filesystem type) and device mounts (raw block device) to be configured and used with Aerospike Statefulset. Check below [configuration section](#configuration) or [`values.yaml`](https://github.com/aerospike/aerospike-kubernetes-enterprise/blob/master/helm/values.yaml) file for more details.
@@ -167,7 +144,7 @@ For example,
 ```sh
 helm install aerospike-release aerospike/aerospike-enterprise \
 			 --set dbReplicas=4 \
-			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
+			 --set-file featureKeyFile=/secrets/aerospike/features.conf \
 			 --set hostNetwork.enabled=true \
 			 --set hostNetwork.useExternalIP=true
 ```
@@ -177,7 +154,7 @@ For Helm v2,
 ```sh
 helm install --name aerospike-release aerospike/aerospike-enterprise \
 			 --set dbReplicas=4 \
-			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
+			 --set-file featureKeyFile=/secrets/aerospike/features.conf \
 			 --set hostNetwork.enabled=true \
 			 --set hostNetwork.useExternalIP=true
 ```
@@ -205,7 +182,7 @@ Example,
 
 ```sh
 helm install aerospike-release aerospike/aerospike-enterprise \
-			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
+			 --set-file featureKeyFile=/secrets/aerospike/features.conf \
 			 --set dbReplicas=5 \
 			 --set nodePortServices.enabled=true \
 			 --set nodePortServices.useExternalIP=true
@@ -215,7 +192,7 @@ For Helm v2,
 
 ```sh
 helm install --name aerospike-release aerospike/aerospike-enterprise \
-			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
+			 --set-file featureKeyFile=/secrets/aerospike/features.conf \
 			 --set dbReplicas=5 \
 			 --set nodePortServices.enabled=true \
 			 --set nodePortServices.useExternalIP=true
@@ -242,7 +219,7 @@ Example,
 
 ```sh
 helm install aerospike-release aerospike/aerospike-enterprise \
-			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
+			 --set-file featureKeyFile=/secrets/aerospike/features.conf \
 			 --set dbReplicas=5 \
 			 --set loadBalancerServices.enabled=true
 ```
@@ -251,7 +228,7 @@ For Helm v2,
 
 ```sh
 helm install --name aerospike-release aerospike/aerospike-enterprise \
-			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
+			 --set-file featureKeyFile=/secrets/aerospike/features.conf \
 			 --set dbReplicas=5 \
 			 --set loadBalancerServices.enabled=true
 ```
@@ -270,7 +247,7 @@ Example,
 
 ```sh
 helm install aerospike-release aerospike/aerospike-enterprise \
-			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
+			 --set-file featureKeyFile=/secrets/aerospike/features.conf \
 			 --set dbReplicas=4 \
 			 --set externalIPServices.enabled=true \
 			 --set externalIPServices.externalIPEndpoints[0].IP=10.160.15.224 \
@@ -287,7 +264,7 @@ For Helm v2,
 
 ```sh
 helm install --name aerospike-release aerospike/aerospike-enterprise \
-			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
+			 --set-file featureKeyFile=/secrets/aerospike/features.conf \
 			 --set dbReplicas=4 \
 			 --set externalIPServices.enabled=true \
 			 --set externalIPServices.externalIPEndpoints[0].IP=10.160.15.224 \
@@ -309,7 +286,7 @@ Aerospike Prometheus Exporter (sidecar) can be enabled by setting `enableAerospi
 
 ```sh
 helm install aerospike-release aerospike/aerospike-enterprise \
-			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
+			 --set-file featureKeyFile=/secrets/aerospike/features.conf \
 			 --set enableAerospikePrometheusExporter=true
 ```
 
@@ -317,7 +294,7 @@ For Helm v2,
 
 ```sh
 helm install --name aerospike-release aerospike/aerospike-enterprise \
-			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
+			 --set-file featureKeyFile=/secrets/aerospike/features.conf \
 			 --set enableAerospikePrometheusExporter=true
 ```
 
@@ -328,7 +305,7 @@ Note that, setting `enableAerospikeMonitoring` to `true` will automatically enab
 
 ```sh
 helm install aerospike-release aerospike/aerospike-enterprise \
-			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
+			 --set-file featureKeyFile=/secrets/aerospike/features.conf \
 			 --set enableAerospikeMonitoring=true
 ```
 
@@ -336,17 +313,21 @@ For Helm v2,
 
 ```sh
 helm install --name aerospike-release aerospike/aerospike-enterprise \
-			 --set-file featureKeyFilePath=/secrets/aerospike/features.conf \
+			 --set-file featureKeyFile=/secrets/aerospike/features.conf \
 			 --set enableAerospikeMonitoring=true
 ```
 
-Use option `--set-file prometheus.aerospikeAlertRulesFilePath` to add a custom aerospike alert rules configuration file.
+Use option `--set-file prometheus.aerospikeAlertRulesFile` to add a custom aerospike alert rules configuration file.
 
-> `prometheus.aerospikeAlertRulesFilePath` should be a file path on helm "client" machine (where the user is running 'helm install')
+> `prometheus.aerospikeAlertRulesFile` should be a file path on helm "client" machine (where the user is running 'helm install')
 
-Use option `--set-file alertmanager.alertmanagerConfFilePath` to add an alertmanager configuration file.
+Aerospike alert rules file can also be passed in base64 encoded form. Use `prometheus.aerospikeAlertRulesFileBase64` configuration to specify base64 encoded string of the Aerospike alert rules file.
 
-> `alertmanager.alertmanagerConfFilePath` should be a file path on helm "client" machine (where the user is running 'helm install')
+Use option `--set-file alertmanager.alertmanagerConfFile` to add an alertmanager configuration file.
+
+> `alertmanager.alertmanagerConfFile` should be a file path on helm "client" machine (where the user is running 'helm install')
+
+Alertmanager configuration file can also be passed in base64 encoded form. Use `alertmanager.alertmanagerConfFileBase64` configuration to specify base64 encoded string of the alertmanager configuration file.
 
 Check the below [configuration section](#configuration) or [`values.yaml`](values.yaml) file for more details on configuration of the `Aerospike Prometheus Exporter`, `Prometheus`, `Grafana` and `Alertmanager`.
 
@@ -431,7 +412,7 @@ aerospikeNetworkTLSConfig:
 | `image.repository`                                    | Aerospike Server Docker Image                                                                                                                                                             | `aerospike/aerospike-server-enterprise`                                                                              |
 | `image.tag`                                           | Aerospike Server Docker Image Tag                                                                                                                                                         | `5.4.0.3`                                                                                                            |
 | `initImage.repository`                                | Aerospike Kubernetes Init Container Image                                                                                                                                                 | `aerospike/aerospike-kubernetes-init`                                                                                |
-| `initImage.tag`                                       | Aerospike Kubernetes Init Container Image Tag                                                                                                                                             | `latest`                                                                                                              |
+| `initImage.tag`                                       | Aerospike Kubernetes Init Container Image Tag                                                                                                                                             | `latest`                                                                                                             |
 | `autoGenerateNodeIds`                                 | Auto generate and assign node-id(s) based on Pod's Ordinal Index                                                                                                                          | `true`                                                                                                               |
 | `nodeIDPrefix`                                        | Node ID prefix                                                                                                                                                                            | `a`                                                                                                                  |
 | `aerospikeNamespace`                                  | Aerospike Namespace name                                                                                                                                                                  | `test`                                                                                                               |
@@ -451,6 +432,7 @@ aerospikeNetworkTLSConfig:
 | `security.authMode`                                   | Auth mode for the access-control security                                                                                                                                                 | `internal`                                                                                                           |
 | `tlsConfig`                                           | Define TLS certificates                                                                                                                                                                   | `[]`                                                                                                                 |
 | `aerospikeNetworkTLSConfig`                           | Define Aerospike network TLS configurations                                                                                                                                               | `{}`                                                                                                                 |
+| `args`                                                | Define additional arguments to be passed to the Aerospike container                                                                                                                       | `[]`                                                                                                                 |
 | `autoRolloutConfig`		   	                        | Rollout ConfigMap/Secrets changes on 'helm upgrade'    			                                                                                                                        | `false`					   	                                                                                       |
 | `hostNetwork.enabled`		 			                | Enable `hostNetwork`. Allows Pods to access host network.			                                                                                                                        | `false`					   	                                                                                       |
 | `hostNetwork.useExternalIP`		 			        | Allow applications to connect using external IP of the instances			                                                                                                                | `false`					   	                                                                                       |
@@ -475,10 +457,14 @@ aerospikeNetworkTLSConfig:
 | `resources`                                           | Resource configuration (`requests` and `limits`)                                                                                                                                          | `{}` (nil)                                                                                                           |
 | `podSecurityContext`                                  | Aerospike pod security context                                                                                                                                                            | `{}` (nil)                                                                                                           |
 | `securityContext`                                     | Aerospike container security context                                                                                                                                                      | `{}` (nil)                                                                                                           |
-| `confFilePath`                                        | Custom aerospike.conf file path on helm client machine (To be used during the runtime, `helm install` .. etc)                                                                             | `not defined`                                                                                                        |
-| `featureKeyFilePath`                                  | Feature Key File (Enterprise License) file location on helm client machine (To be used during the runtime, `helm install` .. etc)                                                         | `not defined`                                                                                                        |
-| `prometheus.aerospikeAlertRulesFilePath`              | Aerospike alert rules configuration file location on helm client machine (To be used during the runtime, `helm install` .. etc)                                                           | `not defined`                                                                                                        |
-| `alertmanager.alertmanagerConfFilePath`               | Alertmanager configuration file location on helm client machine (To be used during the runtime, `helm install` .. etc)                                                                    | `not defined`                                                                                                        |
+| `aerospikeConfFile`                                   | Custom aerospike.conf file path on helm client machine (To be used during the runtime, `helm install` .. etc)                                                                             | `not defined`                                                                                                        |
+| `aerospikeConfFileBase64`                             | Custom Aerospike configuration file as base64 encoded string                                                                                                                              | `"" (not defined)`                                                                                                   |
+| `featureKeyFile`                                      | Feature Key File (Enterprise License) file location on helm client machine (To be used during the runtime, `helm install` .. etc)                                                         | `not defined`                                                                                                        |
+| `featureKeyFileBase64`                                | Feature key file as base64 encoded string                                                                                                                                                 | `"" (not defined)`                                                                                                   |
+| `prometheus.aerospikeAlertRulesFile`                  | Aerospike alert rules configuration file location on helm client machine (To be used during the runtime, `helm install` .. etc)                                                           | `not defined`                                                                                                        |
+| `prometheus.aerospikeAlertRulesFileBase64`            | Aerospike alert rules file as base64 encoded string                                                                                                                                       | `"" (not defined)`                                                                                                   |
+| `alertmanager.alertmanagerConfFile`                   | Alertmanager configuration file location on helm client machine (To be used during the runtime, `helm install` .. etc)                                                                    | `not defined`                                                                                                        |
+| `alertmanager.alertmanagerConfFileBase64`             | Alertmanager configuration file as base64 encoded string                                                                                                                                  | `"" (not defined)`                                                                                                   |
 | `enableAerospikePrometheusExporter`	                | Enable Sidecar Aerospike Prometheus Exporter (only)                                                                                                                                       | `false`					   	                                                                                       |
 | `enableAerospikeMonitoring`		 	                | Enable Aerospike Monitoring - sidecar prometheus exporter, Prometheus, Grafana, Alertmanager stack                                                                                        | `false`					   	                                                                                       |
 | `exporter.repository`                                 | Aerospike prometheus exporter image repository                                                                                                                                            | `aerospike/aerospike-prometheus-exporter`                                                                            |

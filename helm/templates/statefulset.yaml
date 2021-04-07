@@ -35,10 +35,8 @@ spec:
   serviceName: {{ template "aerospike.fullname" . }}
   selector:
     matchLabels:
-      app: {{ template "aerospike.name" . }}
-      chart: {{ .Chart.Name }}
-      release: {{ .Release.Name }}
-      unique-app: {{ .Release.Name }}-aerospike
+      <<: *AerospikeDeploymentLabels
+      {{- with .Values.podLabels }}{{ toYaml . | nindent 6 }}{{ end }}
   replicas: {{ .Values.dbReplicas }}
   template:
     metadata:
@@ -47,7 +45,7 @@ spec:
         {{- with .Values.podLabels }}{{ toYaml . | nindent 8 }}{{ end }}
       annotations:
         {{- if .Values.autoRolloutConfig }}
-        # TODO: Add an entry for secrets when used in future
+        checksum/secret: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         {{- end }}
         {{- with .Values.podAnnotations }}{{ toYaml . | nindent 8 }}{{ end }}
@@ -104,6 +102,9 @@ spec:
       containers:
       - name: aerospike
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        {{- with .Values.args }}
+        args: {{- toYaml . | nindent 10 }}
+        {{- end }}
         securityContext:
 {{ toYaml .Values.securityContext | indent 10 }}
         ports:
@@ -373,6 +374,8 @@ spec:
           mountPath: /etc/aerospike
         - name: initconfigs
           mountPath: /configs
+        - name: secretsdir
+          mountPath: /secrets
         {{- if or (eq .Values.enableAerospikeMonitoring true) (eq .Values.enableAerospikePrometheusExporter true) }}
         - name: apeconfdir
           mountPath: /etc/aerospike-prometheus-exporter
@@ -510,6 +513,9 @@ spec:
       - name: initconfigs
         configMap:
           name: {{ .Release.Name }}-conf
+      - name: secretsdir
+        secret:
+          secretName: {{ .Release.Name }}-secrets
       {{- range $lv := .Values.volumes }}
       - name: {{ $lv.name | quote }}
 {{ toYaml $lv.template  | indent 8}}
