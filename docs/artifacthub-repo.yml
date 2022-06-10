@@ -15,4 +15,6 @@ owners: # (optional, used to claim repository ownership)
     email: developers@aerospike.com
   - name: Joe Martin
     email: joem@aerospike.com
+  - name: Joe Martin
+    email: jmartin@aerospike.com
     
