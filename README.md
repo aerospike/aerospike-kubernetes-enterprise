@@ -1,7 +1,7 @@
 # aerospike-kubernetes-enterprise
 
-This project contains the init container used in Kubernetes (k8s) and the Aerospike StatefulSet definition.
-This manifest will allow you to deploy a fully formed Aerospike cluster in minutes.
+DEPRECATED: This Helm chart is no longer actively developed, instead use (https://artifacthub.io/packages/helm/aerospike/aerospike-kubernetes-operator)
+for complete life cycle management on Kubernetes.
 
 This project uses:
 
