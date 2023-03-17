@@ -1,6 +1,7 @@
 # Helm chart for Aerospike (EE) on Kubernetes
 
-Implements a dynamically scalable Aerospike cluster using Kubernetes StatefulSets.
+## DEPRECATED
+This Helm chart is no longer actively developed, instead use (https://artifacthub.io/packages/helm/aerospike/aerospike-kubernetes-operator)
 
 
 ## Pre Requisites

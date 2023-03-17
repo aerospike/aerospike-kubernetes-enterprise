@@ -4,7 +4,9 @@ entries:
   - apiVersion: v1
     appVersion: 5.5.0.7
     created: "2021-04-08T02:02:55.807607+05:30"
-    description: A Helm chart for Aerospike Server Enterprise Edition on Kubernetes
+    deprecated: true
+    description: "DEPRECATED: This Helm chart is no longer actively developed, instead use (https://artifacthub.io/packages/helm/aerospike/aerospike-kubernetes-operator)
+    for complete life cycle management on Kubernetes"
     digest: ecb9004c8f9b894127a5330d5aa1df8d8888c42d2467278a4d3c7632ab6a1049
     icon: https://avatars0.githubusercontent.com/u/2214313?s=200&v=4
     maintainers:
