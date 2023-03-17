@@ -4,8 +4,6 @@
 This Helm chart is no longer actively developed, instead use (https://artifacthub.io/packages/helm/aerospike/aerospike-kubernetes-operator)
 
 
-
-
 ## Pre Requisites
 
 - Kubernetes 1.13+
