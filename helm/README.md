@@ -1,8 +1,7 @@
-# Helm chart for Aerospike (EE) on Kubernetes
-
-## DEPRECATED
+# DEPRECATED
 This Helm chart is no longer actively developed, instead use (https://artifacthub.io/packages/helm/aerospike/aerospike-kubernetes-operator)
 
+# Helm chart for Aerospike (EE) on Kubernetes
 
 ## Pre Requisites
 
