@@ -3,10 +3,26 @@ entries:
   aerospike-enterprise:
   - apiVersion: v1
     appVersion: 5.5.0.7
-    created: "2021-04-08T02:02:55.807607+05:30"
+    created: "2023-03-20T14:16:44.319185+05:30"
     deprecated: true
-    description: "DEPRECATED: This Helm chart is no longer actively developed, instead use (https://artifacthub.io/packages/helm/aerospike/aerospike-kubernetes-operator)
-    for complete life cycle management on Kubernetes"
+    description: 'DEPRECATED: This Helm chart is no longer actively developed, instead
+      use (https://artifacthub.io/packages/helm/aerospike/aerospike-kubernetes-operator)
+      for complete life cycle management on Kubernetes'
+    digest: 90fbbf817b17add33692b001a322ef030ccf6a532c56320bfb916050cabfb241
+    icon: https://avatars0.githubusercontent.com/u/2214313?s=200&v=4
+    name: aerospike-enterprise
+    sources:
+    - https://github.com/aerospike/aerospike-server-enterprise.docker
+    - https://github.com/aerospike/aerospike-kubernetes-enterprise
+    - https://github.com/aerospike/aerospike-kubernetes-init
+    - https://github.com/aerospike/aerospike-prometheus-exporter
+    urls:
+    - https://aerospike.github.io/aerospike-kubernetes-enterprise/aerospike-enterprise-5.5.1.tgz
+    version: 5.5.1
+  - apiVersion: v1
+    appVersion: 5.5.0.7
+    created: "2023-03-20T14:16:44.317447+05:30"
+    description: A Helm chart for Aerospike Server Enterprise Edition on Kubernetes
     digest: ecb9004c8f9b894127a5330d5aa1df8d8888c42d2467278a4d3c7632ab6a1049
     icon: https://avatars0.githubusercontent.com/u/2214313?s=200&v=4
     maintainers:
@@ -24,7 +40,7 @@ entries:
     version: 5.5.0
   - apiVersion: v1
     appVersion: 5.4.0.9
-    created: "2021-04-08T02:02:55.805521+05:30"
+    created: "2023-03-20T14:16:44.315579+05:30"
     description: A Helm chart for Aerospike Server Enterprise Edition on Kubernetes
     digest: 0d6e345696d6155a6f0e6e41b12fe9696f764fa14134c98f5215b234cbaed7cf
     icon: https://avatars0.githubusercontent.com/u/2214313?s=200&v=4
@@ -43,7 +59,7 @@ entries:
     version: 5.4.0
   - apiVersion: v1
     appVersion: 5.3.0.14
-    created: "2021-04-08T02:02:55.803379+05:30"
+    created: "2023-03-20T14:16:44.313631+05:30"
     description: A Helm chart for Aerospike Server Enterprise Edition on Kubernetes
     digest: 9eead6f5f60f224bc9ca44c768446704682fd9400b66dba6683e5f7d4f10f8a1
     icon: https://avatars0.githubusercontent.com/u/2214313?s=200&v=4
@@ -62,7 +78,7 @@ entries:
     version: 5.3.0
   - apiVersion: v1
     appVersion: 5.2.0.24
-    created: "2021-04-08T02:02:55.800509+05:30"
+    created: "2023-03-20T14:16:44.312164+05:30"
     description: A Helm chart for Aerospike Server Enterprise Edition on Kubernetes
     digest: 3c81dac29b8e10911e91459741ca9f960e14fb7db1fc570735fe713cfdebd317
     icon: https://avatars0.githubusercontent.com/u/2214313?s=200&v=4
@@ -81,7 +97,7 @@ entries:
     version: 5.2.0
   - apiVersion: v1
     appVersion: 5.1.0.31
-    created: "2021-04-08T02:02:55.798325+05:30"
+    created: "2023-03-20T14:16:44.310702+05:30"
     description: A Helm chart for Aerospike Server Enterprise Edition on Kubernetes
     digest: 3821d8645d6e1bbd0761a5fe30942a13ad264987eabb3a83bc38e8e7c747cb24
     icon: https://avatars0.githubusercontent.com/u/2214313?s=200&v=4
@@ -100,7 +116,7 @@ entries:
     version: 5.1.0
   - apiVersion: v1
     appVersion: 5.0.0.33
-    created: "2021-04-08T02:02:55.796121+05:30"
+    created: "2023-03-20T14:16:44.309012+05:30"
     description: A Helm chart for Aerospike Server Enterprise Edition on Kubernetes
     digest: c9f55b127bf227af804818cfa54fb1d730c73ff2d213fc62e5657b33ee9f2372
     icon: https://avatars0.githubusercontent.com/u/2214313?s=200&v=4
@@ -119,7 +135,7 @@ entries:
     version: 5.0.0
   - apiVersion: v1
     appVersion: 4.9.0.30
-    created: "2021-04-08T02:02:55.79311+05:30"
+    created: "2023-03-20T14:16:44.307577+05:30"
     description: A Helm chart for Aerospike Server Enterprise Edition on Kubernetes
     digest: 3b7a1db2e59e6904c3aa63f450ee0b2636dbbfa1d1fcfc3989aee5ca9f75c4b3
     icon: https://avatars0.githubusercontent.com/u/2214313?s=200&v=4
@@ -138,7 +154,7 @@ entries:
     version: 4.9.0
   - apiVersion: v1
     appVersion: 4.8.0.31
-    created: "2021-04-08T02:02:55.790689+05:30"
+    created: "2023-03-20T14:16:44.306041+05:30"
     description: A Helm chart for Aerospike Server Enterprise Edition on Kubernetes
     digest: 894b5c14e43d63dbdfca80a802a55b1e34adc053b041ba368febf5647f1836d8
     icon: https://avatars0.githubusercontent.com/u/2214313?s=200&v=4
@@ -157,7 +173,7 @@ entries:
     version: 4.8.0
   - apiVersion: v1
     appVersion: 4.7.0.26
-    created: "2021-04-08T02:02:55.788434+05:30"
+    created: "2023-03-20T14:16:44.303807+05:30"
     description: A Helm chart for Aerospike Server Enterprise Edition on Kubernetes
     digest: 2c94c8b49687328d18da4db2c61a6afc2e66f7fb17ca24aba8bc1ff66c7dab4c
     icon: https://avatars0.githubusercontent.com/u/2214313?s=200&v=4
@@ -176,7 +192,7 @@ entries:
     version: 4.7.0
   - apiVersion: v1
     appVersion: 4.6.0.21
-    created: "2021-04-08T02:02:55.784632+05:30"
+    created: "2023-03-20T14:16:44.302084+05:30"
     description: A Helm chart for Aerospike Server Enterprise Edition on Kubernetes
     digest: a19ac750dd15d3cb4d62e67f82f0791d8a4fb21dffd7454863da787a105b70ea
     icon: https://avatars0.githubusercontent.com/u/2214313?s=200&v=4
@@ -465,4 +481,4 @@ entries:
     urls:
     - https://aerospike.github.io/aerospike-kubernetes-operator/aerospike-kubernetes-operator-1.0.0.tgz
     version: 1.0.0
-generated: "2021-04-08T02:02:55.780793+05:30"
+generated: "2023-03-20T14:16:44.297901+05:30"

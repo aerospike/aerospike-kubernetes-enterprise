@@ -3,6 +3,13 @@
 This file documents all notable changes to Aerospike Helm Chart (Enterprise Edition).
 
 
+## [1.5.3](https://github.com/aerospike/aerospike-kubernetes-enterprise/releases/tag/1.5.3)
+
+### Update
+
+- Deprecating Aerospike Helm Chart (Enterprise Edition)
+
+
 ## [1.5.2](https://github.com/aerospike/aerospike-kubernetes-enterprise/releases/tag/1.5.2)
 
 ### Improvements
