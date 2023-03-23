@@ -17,4 +17,5 @@ owners: # (optional, used to claim repository ownership)
     email: joem@aerospike.com
   - name: Joe Martin
     email: jmartin@aerospike.com
-    
+  - name: Sudhanshu Ranjan
+    email: sudhanshu@aerospike.com

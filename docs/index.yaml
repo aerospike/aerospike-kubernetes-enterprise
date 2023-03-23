@@ -3,10 +3,26 @@ entries:
   aerospike-enterprise:
   - apiVersion: v1
     appVersion: 5.5.0.7
-    created: "2021-04-08T02:02:55.807607+05:30"
+    created: "2023-03-20T14:16:44.319185+05:30"
     deprecated: true
-    description: "DEPRECATED: This Helm chart is no longer actively developed, instead use (https://artifacthub.io/packages/helm/aerospike/aerospike-kubernetes-operator)
-    for complete life cycle management on Kubernetes"
+    description: 'DEPRECATED: This Helm chart is no longer actively developed, instead
+      use (https://artifacthub.io/packages/helm/aerospike/aerospike-kubernetes-operator)
+      for complete life cycle management on Kubernetes'
+    digest: 90fbbf817b17add33692b001a322ef030ccf6a532c56320bfb916050cabfb241
+    icon: https://avatars0.githubusercontent.com/u/2214313?s=200&v=4
+    name: aerospike-enterprise
+    sources:
+    - https://github.com/aerospike/aerospike-server-enterprise.docker
+    - https://github.com/aerospike/aerospike-kubernetes-enterprise
+    - https://github.com/aerospike/aerospike-kubernetes-init
+    - https://github.com/aerospike/aerospike-prometheus-exporter
+    urls:
+    - https://aerospike.github.io/aerospike-kubernetes-enterprise/aerospike-enterprise-5.5.1.tgz
+    version: 5.5.1
+  - apiVersion: v1
+    appVersion: 5.5.0.7
+    created: "2021-04-08T02:02:55.807607+05:30"
+    description: A Helm chart for Aerospike Server Enterprise Edition on Kubernetes
     digest: ecb9004c8f9b894127a5330d5aa1df8d8888c42d2467278a4d3c7632ab6a1049
     icon: https://avatars0.githubusercontent.com/u/2214313?s=200&v=4
     maintainers:
